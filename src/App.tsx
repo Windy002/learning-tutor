@@ -2,7 +2,7 @@ import TopBar from './components/TopBar';
 import PhaseBanner from './components/PhaseBanner';
 import MessageList from './components/MessageList';
 import InputBox from './components/InputBox';
-import NotesDrawer from './components/NotesDrawer';
+import SessionSidebar from './components/SessionSidebar';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
       <TopBar />
       <PhaseBanner />
       <div className="flex-1 flex overflow-hidden">
-        <NotesDrawer />
+        <SessionSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <MessageList />
           <InputBox />
