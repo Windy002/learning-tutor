@@ -17,18 +17,38 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
   {
     provider: 'Anthropic (Claude)',
     pattern: /anthropic/,
-    models: ['claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001'],
+    models: [
+      'claude-opus-4-8',
+      'claude-opus-4-7',
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-5',
+      'claude-haiku-4-5-20251001',
+    ],
   },
   {
     provider: 'OpenAI',
     pattern: /openai/,
-    models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'o4-mini'],
+    models: [
+      'gpt-5',
+      'gpt-5-mini',
+      'gpt-5-nano',
+      'gpt-4.1',
+      'gpt-4.1-mini',
+      'gpt-4.1-nano',
+      'gpt-4o',
+      'o3',
+      'o3-pro',
+      'o4-mini',
+    ],
   },
 ];
 
 const DEPRECATED_MODELS: Record<string, string> = {
-  'deepseek-chat': 'deepseek-v4-flash（即将废弃，2026-07-24）',
-  'deepseek-reasoner': 'deepseek-v4-flash 思考模式（即将废弃，2026-07-24）',
+  'deepseek-chat': '已废弃，指向 v4-flash（2026-07-24 下线）',
+  'deepseek-reasoner': '已废弃，指向 v4-flash 思考模式（2026-07-24 下线）',
+  'claude-sonnet-4': 'Claude Sonnet 4 原版，2026-06-15 下线，请用 sonnet-4-6',
+  'claude-opus-4': 'Claude Opus 4 原版，2026-06-15 下线，请用 opus-4-8',
+  'gpt-4o': 'GPT-4o 已从 ChatGPT 退役，API 仍可用但建议升级 GPT-4.1 或 GPT-5',
 };
 
 function detectProvider(apiBase: string): string | null {
