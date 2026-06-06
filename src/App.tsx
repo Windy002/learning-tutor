@@ -13,11 +13,11 @@ function App() {
       <TopBar />
       <PhaseBanner />
       <div className="flex-1 flex overflow-hidden">
+        <NotesDrawer />
         <div className="flex-1 flex flex-col min-w-0">
           <MessageList />
           <InputBox />
         </div>
-        <NotesDrawer />
       </div>
     </div>
   );
