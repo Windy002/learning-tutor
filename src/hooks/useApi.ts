@@ -106,5 +106,111 @@ export function useApi() {
     return message;
   };
 
-  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, sendMessage };
+  const askAI = async (userInput?: string) => {
+    const book = store.currentBook;
+    if (!book) {
+      store.setError('请先选择或创建一本书');
+      return;
+    }
+
+    // If user typed something, add it first
+    if (userInput?.trim()) {
+      store.addMessage({
+        id: `msg_${Date.now()}`,
+        type: 'answer',
+        role: 'user',
+        phase: store.currentPhase,
+        round: store.currentRound,
+        content: userInput.trim(),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    store.setLoading(true);
+
+    // Create placeholder for AI response
+    const aiMsgId = `msg_${Date.now()}_ai`;
+    const aiMsgType = store.currentPhase === '全景收网' ? 'summary'
+      : store.currentPhase === '摸底测试' ? 'question'
+      : 'feedback';
+    const aiMsg: Message = {
+      id: aiMsgId,
+      type: aiMsgType,
+      role: 'assistant',
+      phase: store.currentPhase,
+      round: store.currentRound,
+      content: '',
+      timestamp: new Date().toISOString(),
+    };
+    store.addMessage(aiMsg);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: store.messages.filter(m => m.id !== aiMsgId).map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          bookTitle: book.title,
+          domain: book.domain,
+          goal: book.goal,
+          phase: store.currentPhase,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No response stream');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                const msgs = useStore.getState().messages;
+                const updatedMsgs = msgs.map(m =>
+                  m.id === aiMsgId ? { ...m, content: m.content + parsed.content } : m
+                );
+                useStore.setState({ messages: updatedMsgs });
+              }
+              if (parsed.error) {
+                throw new Error(parsed.error);
+              }
+            } catch (e: any) {
+              if (e.message && !e.message.includes('JSON')) throw e;
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      store.setError(e.message);
+      // Remove the empty AI message on error
+      useStore.setState({
+        messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
+      });
+    } finally {
+      store.setLoading(false);
+    }
+  };
+
+  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, sendMessage, askAI };
 }
