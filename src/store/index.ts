@@ -102,7 +102,7 @@ export const useStore = create<AppState>((set) => ({
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
   apiKey: loadSetting('apiKey', ''),
   apiBase: loadSetting('apiBase', 'https://api.deepseek.com'),
-  model: loadSetting('model', 'deepseek-chat'),
+  model: loadSetting('model', 'deepseek-v4-flash'),
   setApiKey: (key) => { try { localStorage.setItem('lt_apiKey', key); } catch {} set({ apiKey: key }); },
   setApiBase: (base) => { try { localStorage.setItem('lt_apiBase', base); } catch {} set({ apiBase: base }); },
   setModel: (model) => { try { localStorage.setItem('lt_model', model); } catch {} set({ model }); },

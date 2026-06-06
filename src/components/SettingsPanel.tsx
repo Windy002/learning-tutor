@@ -5,7 +5,14 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
   {
     provider: 'DeepSeek',
     pattern: /deepseek/,
-    models: ['deepseek-chat', 'deepseek-reasoner'],
+    models: [
+      'deepseek-v4-pro',
+      'deepseek-v4-flash',
+      'deepseek-v3.2',
+      'deepseek-r1',
+      'deepseek-chat',
+      'deepseek-reasoner',
+    ],
   },
   {
     provider: 'Anthropic (Claude)',
@@ -18,6 +25,11 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
     models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'o4-mini'],
   },
 ];
+
+const DEPRECATED_MODELS: Record<string, string> = {
+  'deepseek-chat': 'deepseek-v4-flash（即将废弃，2026-07-24）',
+  'deepseek-reasoner': 'deepseek-v4-flash 思考模式（即将废弃，2026-07-24）',
+};
 
 function detectProvider(apiBase: string): string | null {
   if (!apiBase.trim()) return null;
@@ -111,9 +123,16 @@ export default function SettingsPanel() {
                 <option key={s} value={s} />
               ))}
             </datalist>
-            <p className="text-[11px] text-text-muted mt-1">
-              下拉选择或手动输入
-            </p>
+            {DEPRECATED_MODELS[model] && (
+              <p className="text-[11px] text-amber-600 mt-1">
+                ⚠ {DEPRECATED_MODELS[model]}
+              </p>
+            )}
+            {!DEPRECATED_MODELS[model] && (
+              <p className="text-[11px] text-text-muted mt-1">
+                下拉选择或手动输入
+              </p>
+            )}
           </div>
 
           <div>
