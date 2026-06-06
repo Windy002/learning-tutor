@@ -37,6 +37,22 @@ interface AppState {
   currentTemplate: Template;
   setTemplate: (id: string) => void;
   availablePhases: Phase[];
+
+  // Settings
+  isSettingsOpen: boolean;
+  toggleSettings: () => void;
+  apiKey: string;
+  apiBase: string;
+  model: string;
+  setApiKey: (key: string) => void;
+  setApiBase: (base: string) => void;
+  setModel: (model: string) => void;
+}
+
+function loadSetting(key: string, fallback: string): string {
+  try {
+    return localStorage.getItem(`lt_${key}`) || fallback;
+  } catch { return fallback; }
 }
 
 const defaultTemplate = getDefaultTemplate();
@@ -81,4 +97,13 @@ export const useStore = create<AppState>((set) => ({
     set({ templateId: id, currentTemplate: tpl, availablePhases: phases, currentPhase: phases[0] });
   },
   availablePhases: defaultPhases,
+
+  isSettingsOpen: false,
+  toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
+  apiKey: loadSetting('apiKey', ''),
+  apiBase: loadSetting('apiBase', 'https://api.deepseek.com'),
+  model: loadSetting('model', 'deepseek-chat'),
+  setApiKey: (key) => { try { localStorage.setItem('lt_apiKey', key); } catch {} set({ apiKey: key }); },
+  setApiBase: (base) => { try { localStorage.setItem('lt_apiBase', base); } catch {} set({ apiBase: base }); },
+  setModel: (model) => { try { localStorage.setItem('lt_model', model); } catch {} set({ model }); },
 }));

@@ -1,43 +1,48 @@
-const API_KEY = process.env.LLM_API_KEY || '';
-const API_BASE = process.env.LLM_API_BASE || 'https://api.deepseek.com';
-const MODEL = process.env.LLM_MODEL || 'deepseek-chat';
-
 interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
+interface LLMOptions {
+  apiKey: string;
+  apiBase: string;
+  model: string;
+}
+
 export async function chatWithLLM(
   messages: LLMMessage[],
   systemPrompt: string,
+  options: LLMOptions,
 ): Promise<ReadableStream<Uint8Array>> {
-  if (!API_KEY) {
-    throw new Error('LLM_API_KEY not set. Please set it in environment variables.');
-  }
+  const { apiKey, apiBase, model } = options;
 
   const systemMsg: LLMMessage = {
     role: 'system',
     content: systemPrompt,
   };
 
+  const url = apiBase.endsWith('/v1')
+    ? `${apiBase}/chat/completions`
+    : `${apiBase}/v1/chat/completions`;
+
   const body = JSON.stringify({
-    model: MODEL,
+    model,
     messages: [systemMsg, ...messages],
     stream: true,
   });
 
-  const res = await fetch(`${API_BASE}/v1/chat/completions`, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body,
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`LLM API error ${res.status}: ${err}`);
+    throw new Error(`API 错误 ${res.status}: ${err.slice(0, 300)}`);
   }
 
   return res.body!;

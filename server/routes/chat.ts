@@ -6,10 +6,14 @@ const router = Router();
 // POST /api/chat — stream LLM response
 router.post('/', async (req, res) => {
   try {
-    const { messages, systemPrompt } = req.body;
+    const { messages, systemPrompt, apiKey, apiBase, model } = req.body;
 
     if (!messages?.length) {
       return res.status(400).json({ error: 'messages array required' });
+    }
+
+    if (!apiKey) {
+      return res.status(400).json({ error: '请先点击右上角齿轮图标设置 API Key' });
     }
 
     // Build conversation history (last 20 messages to avoid token limits)
@@ -19,7 +23,7 @@ router.post('/', async (req, res) => {
     }));
 
     const prompt = systemPrompt || '你是学习导师。用中文回复，直击本质，用 Markdown 格式。';
-    const stream = await chatWithLLM(history, prompt);
+    const stream = await chatWithLLM(history, prompt, { apiKey, apiBase, model });
 
     // SSE headers
     res.setHeader('Content-Type', 'text/event-stream');

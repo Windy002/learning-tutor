@@ -9,14 +9,14 @@ export default function TopBar() {
   const isNotesOpen = useStore((s) => s.isNotesOpen);
   const toggleNotes = useStore((s) => s.toggleNotes);
   const availablePhases = useStore((s) => s.availablePhases);
-  const currentTemplate = useStore((s) => s.currentTemplate);
+  const toggleSettings = useStore((s) => s.toggleSettings);
 
   return (
     <header className="sticky top-0 z-10 bg-page border-b border-border px-3 py-2.5 flex items-center justify-between">
       <div className="flex items-center gap-1.5">
         <button
           onClick={toggleNotes}
-          title="笔记面板 (Ctrl+B)"
+          title="侧栏 (Ctrl+B)"
           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
             isNotesOpen
               ? 'bg-brand/10 text-brand'
@@ -41,17 +41,29 @@ export default function TopBar() {
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 bg-white border border-border rounded-full px-2 py-1">
-        <select
-          value={currentPhase}
-          onChange={(e) => setCurrentPhase(e.target.value as Phase)}
-          className="text-xs text-text-secondary bg-transparent border-none outline-none cursor-pointer appearance-none pr-1"
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 bg-white border border-border rounded-full px-2 py-1">
+          <select
+            value={currentPhase}
+            onChange={(e) => setCurrentPhase(e.target.value as Phase)}
+            className="text-xs text-text-secondary bg-transparent border-none outline-none cursor-pointer appearance-none pr-1"
+          >
+            {availablePhases.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+          <span className="text-xs text-text-muted">· 第 {currentRound} 轮</span>
+        </div>
+        <button
+          onClick={toggleSettings}
+          title="API 设置"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bubble transition-colors"
         >
-          {availablePhases.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
-        <span className="text-xs text-text-muted">· 第 {currentRound} 轮</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="8" cy="8" r="2.5" />
+            <path d="M8 1.5v1.5M8 13v1.5M3.5 3.5l1 1M11.5 11.5l1 1M1.5 8H3M13 8h1.5M3.5 12.5l1-1M11.5 4.5l1-1" />
+          </svg>
+        </button>
       </div>
     </header>
   );

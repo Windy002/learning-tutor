@@ -156,6 +156,9 @@ export function useApi() {
           systemPrompt: store.currentTemplate.buildSystemPrompt(
             book.title, book.domain, book.goal, store.currentPhase
           ),
+          apiKey: store.apiKey,
+          apiBase: store.apiBase,
+          model: store.model,
         }),
       });
 

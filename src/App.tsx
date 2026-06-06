@@ -3,6 +3,7 @@ import PhaseBanner from './components/PhaseBanner';
 import MessageList from './components/MessageList';
 import InputBox from './components/InputBox';
 import SessionSidebar from './components/SessionSidebar';
+import SettingsPanel from './components/SettingsPanel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <InputBox />
         </div>
       </div>
+      <SettingsPanel />
     </div>
   );
 }
