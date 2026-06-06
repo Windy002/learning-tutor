@@ -21,12 +21,17 @@ export default function SessionSidebar() {
   const templateId = useStore((s) => s.templateId);
   const currentTemplate = useStore((s) => s.currentTemplate);
   const setTemplate = useStore((s) => s.setTemplate);
-  const { fetchBooks, createBook, fetchSessions, saveSession, askAI } = useApi();
+  const { fetchBooks, createBook, fetchSessions, saveSession, askAI, addNote, deleteNote } = useApi();
+  const showToast = useStore((s) => s.showToast);
+  const setBooks = useStore((s) => s.setBooks);
+  const setSessions = useStore((s) => s.setSessions);
+  const setMessages = useStore((s) => s.setMessages);
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
   const [showNewBook, setShowNewBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
   const [newBookDomain, setNewBookDomain] = useState('');
   const [newBookGoal, setNewBookGoal] = useState('');
+  const [newNoteText, setNewNoteText] = useState('');
 
   useEffect(() => {
     fetchBooks();
@@ -87,6 +92,67 @@ export default function SessionSidebar() {
     fetchSessions(book.id);
   };
 
+  const handleDeleteSession = async (session: Session) => {
+    try {
+      await fetch(`/api/sessions/${encodeURIComponent(session.id)}`, { method: 'DELETE' });
+      setSessions(sessions.filter(s => s.id !== session.id));
+      if (currentSession?.id === session.id) {
+        setCurrentSession(null);
+        setMessages([]);
+      }
+      showToast('会话已删除');
+    } catch {
+      showToast('删除失败', 'error');
+    }
+  };
+
+  const handleDeleteBook = async (book: Book) => {
+    if (!confirm(`确定删除《${book.title}》及其所有会话？`)) return;
+    try {
+      await fetch(`/api/books/${encodeURIComponent(book.id)}`, { method: 'DELETE' });
+      setBooks(books.filter(b => b.id !== book.id));
+      if (currentBook?.id === book.id) {
+        setCurrentBook(null);
+        setCurrentSession(null);
+        setMessages([]);
+      }
+      showToast('书籍已删除');
+    } catch {
+      showToast('删除失败', 'error');
+    }
+  };
+
+  const handleAddNote = async () => {
+    if (!newNoteText.trim() || !currentBook || !currentSession) return;
+    try {
+      const note = await addNote(currentBook.id, newNoteText.trim(), currentSession.id);
+      if (currentBook) {
+        setCurrentBook({
+          ...currentBook,
+          notes: [...(currentBook.notes || []), note],
+        });
+      }
+      setNewNoteText('');
+      showToast('笔记已添加');
+    } catch {
+      showToast('添加失败', 'error');
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!currentBook) return;
+    try {
+      await deleteNote(currentBook.id, noteId);
+      setCurrentBook({
+        ...currentBook,
+        notes: (currentBook.notes || []).filter(n => n.id !== noteId),
+      });
+      showToast('笔记已删除');
+    } catch {
+      showToast('删除失败', 'error');
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -130,19 +196,30 @@ export default function SessionSidebar() {
             <>
               {/* Book selector + New session */}
               <div className="p-3 border-b border-border space-y-2">
-                <select
-                  value={currentBook?.id || ''}
-                  onChange={(e) => {
-                    const book = books.find(b => b.id === e.target.value);
-                    if (book) handleSelectBook(book);
-                  }}
-                  className="w-full text-xs text-text-primary bg-page border border-border rounded-lg px-2.5 py-1.5 outline-none"
-                >
-                  <option value="">选择书籍...</option>
-                  {books.map((b) => (
-                    <option key={b.id} value={b.id}>{b.title}</option>
-                  ))}
-                </select>
+                <div className="flex gap-1.5">
+                  <select
+                    value={currentBook?.id || ''}
+                    onChange={(e) => {
+                      const book = books.find(b => b.id === e.target.value);
+                      if (book) handleSelectBook(book);
+                    }}
+                    className="flex-1 text-xs text-text-primary bg-page border border-border rounded-lg px-2.5 py-1.5 outline-none"
+                  >
+                    <option value="">选择书籍...</option>
+                    {books.map((b) => (
+                      <option key={b.id} value={b.id}>{b.title}</option>
+                    ))}
+                  </select>
+                  {currentBook && (
+                    <button
+                      onClick={() => handleDeleteBook(currentBook)}
+                      title="删除此书"
+                      className="text-xs text-text-muted hover:text-red-500 px-1.5 py-1 transition-colors"
+                    >
+                      🗑
+                    </button>
+                  )}
+                </div>
                 <div className="flex gap-1.5">
                   <select
                     value={templateId}
@@ -174,43 +251,80 @@ export default function SessionSidebar() {
                   </p>
                 ) : (
                   sessions.map((s) => (
-                    <button
+                    <div
                       key={s.id}
-                      onClick={() => handleSelectSession(s)}
-                      className={`w-full text-left px-3 py-2.5 border-b border-border/50 hover:bg-page transition-colors ${
+                      className={`flex items-center border-b border-border/50 hover:bg-page transition-colors group ${
                         currentSession?.id === s.id ? 'bg-page border-l-2 border-l-brand' : ''
                       }`}
                     >
-                      <p className="text-xs text-text-primary truncate">
-                        {s.messages?.[0]?.content?.slice(0, 30) || '新会话'}
-                      </p>
-                      <p className="text-[11px] text-text-muted mt-0.5">
-                        {new Date(s.createdAt).toLocaleDateString('zh-CN')} · {s.phase} · {s.messages?.length || 0} 条消息
-                      </p>
-                    </button>
+                      <button
+                        onClick={() => handleSelectSession(s)}
+                        className="flex-1 text-left px-3 py-2.5"
+                      >
+                        <p className="text-xs text-text-primary truncate">
+                          {s.messages?.[0]?.content?.slice(0, 30) || `${s.phase} · 第 ${s.round} 轮`}
+                        </p>
+                        <p className="text-[11px] text-text-muted mt-0.5">
+                          {new Date(s.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · {s.phase} · {s.messages?.length || 0} 条消息
+                        </p>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteSession(s); }}
+                        title="删除会话"
+                        className="text-text-muted hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                      >
+                        🗑
+                      </button>
+                    </div>
                   ))
                 )}
               </div>
             </>
           ) : (
             /* Notes tab */
-            <div className="flex-1 overflow-y-auto p-3">
-              {notes.length === 0 ? (
-                <p className="text-xs text-text-muted text-center mt-8">
-                  暂无笔记。全景总结阶段可保存内容到这里。
-                </p>
-              ) : (
-                notes.map((note) => (
-                  <div key={note.id} className="bg-page border border-border rounded-lg p-3 mb-2">
-                    <p className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">
-                      {note.content}
-                    </p>
-                    <p className="text-[11px] text-text-muted mt-1.5">
-                      {new Date(note.createdAt).toLocaleDateString('zh-CN')}
-                    </p>
-                  </div>
-                ))
-              )}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-3 border-b border-border">
+                <div className="flex gap-1.5">
+                  <input
+                    value={newNoteText}
+                    onChange={(e) => setNewNoteText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddNote(); }}
+                    placeholder="写一条笔记..."
+                    className="flex-1 text-xs text-text-primary bg-page border border-border rounded-lg px-2.5 py-1.5 outline-none focus:border-brand"
+                  />
+                  <button
+                    onClick={handleAddNote}
+                    disabled={!newNoteText.trim()}
+                    className="text-xs text-brand font-medium border border-brand/30 rounded-lg px-2.5 py-1.5 hover:bg-brand/5 disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    + 添加
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3">
+                {notes.length === 0 ? (
+                  <p className="text-xs text-text-muted text-center mt-8">
+                    暂无笔记。输入框添加或从总结卡片保存。
+                  </p>
+                ) : (
+                  notes.map((note) => (
+                    <div key={note.id} className="bg-page border border-border rounded-lg p-3 mb-2 group relative">
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="absolute top-2 right-2 text-text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-xs leading-none"
+                      >
+                        ×
+                      </button>
+                      <p className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap pr-4">
+                        {note.content}
+                      </p>
+                      <p className="text-[11px] text-text-muted mt-1.5">
+                        {new Date(note.createdAt).toLocaleDateString('zh-CN')}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import path from 'node:path';
-import { getSessionsDir, getBooksDir, readJSON, writeJSON, listFiles } from '../storage.js';
+import { getSessionsDir, getBooksDir, readJSON, writeJSON, listFiles, deleteFile } from '../storage.js';
 import type { Session, Book } from '../../src/types/index.js';
 
 const router = Router();
@@ -70,6 +70,26 @@ router.post('/', (req, res) => {
   session.createdAt = session.createdAt || new Date().toISOString();
   writeJSON(filePath, session);
   res.status(201).json(session);
+});
+
+// DELETE /api/sessions/:id
+router.delete('/:id', (req, res) => {
+  const booksDir = getBooksDir();
+  const bookFiles = listFiles(booksDir);
+  for (const bf of bookFiles) {
+    const book = readJSON<Book>(path.join(booksDir, bf));
+    if (!book) continue;
+    const dir = getSessionsDir(book.title);
+    const sFiles = listFiles(dir);
+    for (const sf of sFiles) {
+      const session = readJSON<Session>(path.join(dir, sf));
+      if (session && session.id === req.params.id) {
+        deleteFile(path.join(dir, sf));
+        return res.json({ deleted: true });
+      }
+    }
+  }
+  res.status(404).json({ error: 'Session not found' });
 });
 
 export default router;

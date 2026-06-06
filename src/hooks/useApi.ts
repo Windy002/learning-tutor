@@ -133,6 +133,12 @@ export function useApi() {
     return note;
   };
 
+  const deleteNote = async (bookId: string, noteId: string) => {
+    await request(`/notes/${encodeURIComponent(bookId)}/${encodeURIComponent(noteId)}`, {
+      method: 'DELETE',
+    });
+  };
+
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
 
@@ -160,7 +166,11 @@ export function useApi() {
   const askAI = async (userInput?: string) => {
     const book = store.currentBook;
     if (!book) {
-      store.setError('请先选择或创建一本书');
+      store.showToast('请先选择或创建一本书', 'error');
+      return;
+    }
+    if (!store.apiKey || !store.apiKey.trim()) {
+      store.showToast('请先设置 API Key（点击右上角 ⚙️）', 'error');
       return;
     }
 
@@ -324,5 +334,5 @@ export function useApi() {
     }
   };
 
-  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, sendMessage, askAI, cancelAI };
+  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, deleteNote, sendMessage, askAI, cancelAI };
 }
