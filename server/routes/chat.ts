@@ -6,7 +6,7 @@ const router = Router();
 // POST /api/chat — stream LLM response
 router.post('/', async (req, res) => {
   try {
-    const { messages, bookTitle, domain, goal, phase } = req.body;
+    const { messages, systemPrompt } = req.body;
 
     if (!messages?.length) {
       return res.status(400).json({ error: 'messages array required' });
@@ -18,7 +18,8 @@ router.post('/', async (req, res) => {
       content: m.content,
     }));
 
-    const stream = await chatWithLLM(history, bookTitle || '未知', domain || '通用', goal || '掌握核心概念', phase || '摸底测试');
+    const prompt = systemPrompt || '你是学习导师。用中文回复，直击本质，用 Markdown 格式。';
+    const stream = await chatWithLLM(history, prompt);
 
     // SSE headers
     res.setHeader('Content-Type', 'text/event-stream');

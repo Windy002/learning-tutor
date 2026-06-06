@@ -153,10 +153,9 @@ export function useApi() {
             role: m.role,
             content: m.content,
           })),
-          bookTitle: book.title,
-          domain: book.domain,
-          goal: book.goal,
-          phase: store.currentPhase,
+          systemPrompt: store.currentTemplate.buildSystemPrompt(
+            book.title, book.domain, book.goal, store.currentPhase
+          ),
         }),
       });
 

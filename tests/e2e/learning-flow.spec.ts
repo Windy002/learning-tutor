@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('App shell', () => {
   test('loads with correct title and empty state', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=学习导师')).toBeVisible();
+    await expect(page.getByRole('banner').locator('text=学习导师')).toBeVisible();
     await expect(page.locator('text=开始你的学习旅程')).toBeVisible();
   });
 
@@ -65,8 +65,8 @@ test.describe('Create book and session', () => {
 
     // Modal should close
     await expect(page.locator('text=新建书籍')).not.toBeVisible();
-    // Book selected in sidebar dropdown
-    await expect(page.getByRole('complementary').getByRole('combobox')).toHaveValue(/.+/);
+    // Book selected — check the book selector has a value
+    await expect(page.getByRole('complementary').getByRole('combobox').first()).toHaveValue(/.+/);
   });
 });
 

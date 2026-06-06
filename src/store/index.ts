@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Book, Session, Message, Phase } from '../types';
+import { getDefaultTemplate, getTemplate, type Template } from '../templates';
 
 interface AppState {
   books: Book[];
@@ -30,7 +31,16 @@ interface AppState {
   error: string | null;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+
+  // Template
+  templateId: string;
+  currentTemplate: Template;
+  setTemplate: (id: string) => void;
+  availablePhases: Phase[];
 }
+
+const defaultTemplate = getDefaultTemplate();
+const defaultPhases = defaultTemplate.phases.map(p => p.name) as Phase[];
 
 export const useStore = create<AppState>((set) => ({
   books: [],
@@ -47,7 +57,7 @@ export const useStore = create<AppState>((set) => ({
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   setMessages: (messages) => set({ messages }),
 
-  currentPhase: '摸底测试',
+  currentPhase: defaultPhases[0],
   setCurrentPhase: (phase) => set({ currentPhase: phase }),
 
   currentRound: 1,
@@ -61,4 +71,14 @@ export const useStore = create<AppState>((set) => ({
   error: null,
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
+
+  templateId: defaultTemplate.id,
+  currentTemplate: defaultTemplate,
+  setTemplate: (id) => {
+    const tpl = getTemplate(id);
+    if (!tpl) return;
+    const phases = tpl.phases.map(p => p.name) as Phase[];
+    set({ templateId: id, currentTemplate: tpl, availablePhases: phases, currentPhase: phases[0] });
+  },
+  availablePhases: defaultPhases,
 }));

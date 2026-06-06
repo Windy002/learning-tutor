@@ -2,6 +2,7 @@ import { useStore } from '../store';
 import { useApi } from '../hooks/useApi';
 import { useState, useEffect } from 'react';
 import type { Book, Session } from '../types';
+import { templates } from '../templates';
 
 export default function SessionSidebar() {
   const isOpen = useStore((s) => s.isNotesOpen);
@@ -17,6 +18,9 @@ export default function SessionSidebar() {
   const currentRound = useStore((s) => s.currentRound);
   const setCurrentPhase = useStore((s) => s.setCurrentPhase);
   const setCurrentRound = useStore((s) => s.setCurrentRound);
+  const templateId = useStore((s) => s.templateId);
+  const currentTemplate = useStore((s) => s.currentTemplate);
+  const setTemplate = useStore((s) => s.setTemplate);
   const { fetchBooks, createBook, fetchSessions, saveSession } = useApi();
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
   const [showNewBook, setShowNewBook] = useState(false);
@@ -137,12 +141,27 @@ export default function SessionSidebar() {
                     <option key={b.id} value={b.id}>{b.title}</option>
                   ))}
                 </select>
-                <button
-                  onClick={handleNewSession}
-                  className="w-full text-xs text-brand font-medium border border-brand/30 rounded-lg px-3 py-1.5 hover:bg-brand/5 transition-colors"
-                >
-                  + 新会话
-                </button>
+                <div className="flex gap-1.5">
+                  <select
+                    value={templateId}
+                    onChange={(e) => setTemplate(e.target.value)}
+                    className="flex-1 text-xs text-text-primary bg-page border border-border rounded-lg px-2 py-1.5 outline-none"
+                    title="学习模式"
+                  >
+                    {templates.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleNewSession}
+                    className="text-xs text-brand font-medium border border-brand/30 rounded-lg px-3 py-1.5 hover:bg-brand/5 transition-colors whitespace-nowrap"
+                  >
+                    + 新会话
+                  </button>
+                </div>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  {currentTemplate.description}
+                </p>
               </div>
 
               {/* Session list */}

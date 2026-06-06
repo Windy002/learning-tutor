@@ -1,8 +1,6 @@
 import { useStore } from '../store';
 import type { Phase } from '../types';
 
-const PHASES: Phase[] = ['摸底测试', '精准补漏', '循环迭代', '全景收网'];
-
 export default function TopBar() {
   const currentBook = useStore((s) => s.currentBook);
   const currentPhase = useStore((s) => s.currentPhase);
@@ -10,6 +8,8 @@ export default function TopBar() {
   const setCurrentPhase = useStore((s) => s.setCurrentPhase);
   const isNotesOpen = useStore((s) => s.isNotesOpen);
   const toggleNotes = useStore((s) => s.toggleNotes);
+  const availablePhases = useStore((s) => s.availablePhases);
+  const currentTemplate = useStore((s) => s.currentTemplate);
 
   return (
     <header className="sticky top-0 z-10 bg-page border-b border-border px-3 py-2.5 flex items-center justify-between">
@@ -47,7 +47,7 @@ export default function TopBar() {
           onChange={(e) => setCurrentPhase(e.target.value as Phase)}
           className="text-xs text-text-secondary bg-transparent border-none outline-none cursor-pointer appearance-none pr-1"
         >
-          {PHASES.map((p) => (
+          {availablePhases.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
