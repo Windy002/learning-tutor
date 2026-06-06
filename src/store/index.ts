@@ -38,6 +38,12 @@ interface AppState {
   setTemplate: (id: string) => void;
   availablePhases: Phase[];
 
+  // Phase suggestion
+  suggestedPhase: string | null;
+  suggestedPhaseReason: string;
+  setSuggestedPhase: (phase: string | null, reason?: string) => void;
+  clearSuggestion: () => void;
+
   // Settings
   isSettingsOpen: boolean;
   toggleSettings: () => void;
@@ -100,6 +106,12 @@ export const useStore = create<AppState>((set) => ({
 
   isSettingsOpen: false,
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
+
+  suggestedPhase: null,
+  suggestedPhaseReason: '',
+  setSuggestedPhase: (phase, reason = '') => set({ suggestedPhase: phase, suggestedPhaseReason: reason }),
+  clearSuggestion: () => set({ suggestedPhase: null, suggestedPhaseReason: '' }),
+
   apiKey: loadSetting('apiKey', ''),
   apiBase: loadSetting('apiBase', 'https://api.deepseek.com'),
   model: loadSetting('model', 'deepseek-v4-flash'),
