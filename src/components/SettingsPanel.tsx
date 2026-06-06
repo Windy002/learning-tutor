@@ -5,14 +5,7 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
   {
     provider: 'DeepSeek',
     pattern: /deepseek/,
-    models: [
-      'deepseek-v4-pro',
-      'deepseek-v4-flash',
-      'deepseek-v3.2',
-      'deepseek-r1',
-      'deepseek-chat',
-      'deepseek-reasoner',
-    ],
+    models: ['deepseek-v4-pro', 'deepseek-v4-flash', 'deepseek-v3.2', 'deepseek-r1'],
   },
   {
     provider: 'Anthropic (Claude)',
@@ -35,21 +28,12 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
       'gpt-4.1',
       'gpt-4.1-mini',
       'gpt-4.1-nano',
-      'gpt-4o',
       'o3',
       'o3-pro',
       'o4-mini',
     ],
   },
 ];
-
-const DEPRECATED_MODELS: Record<string, string> = {
-  'deepseek-chat': '已废弃，指向 v4-flash（2026-07-24 下线）',
-  'deepseek-reasoner': '已废弃，指向 v4-flash 思考模式（2026-07-24 下线）',
-  'claude-sonnet-4': 'Claude Sonnet 4 原版，2026-06-15 下线，请用 sonnet-4-6',
-  'claude-opus-4': 'Claude Opus 4 原版，2026-06-15 下线，请用 opus-4-8',
-  'gpt-4o': 'GPT-4o 已从 ChatGPT 退役，API 仍可用但建议升级 GPT-4.1 或 GPT-5',
-};
 
 function detectProvider(apiBase: string): string | null {
   if (!apiBase.trim()) return null;
@@ -143,16 +127,9 @@ export default function SettingsPanel() {
                 <option key={s} value={s} />
               ))}
             </datalist>
-            {DEPRECATED_MODELS[model] && (
-              <p className="text-[11px] text-amber-600 mt-1">
-                ⚠ {DEPRECATED_MODELS[model]}
-              </p>
-            )}
-            {!DEPRECATED_MODELS[model] && (
-              <p className="text-[11px] text-text-muted mt-1">
-                下拉选择或手动输入
-              </p>
-            )}
+            <p className="text-[11px] text-text-muted mt-1">
+              下拉选择或手动输入
+            </p>
           </div>
 
           <div>
