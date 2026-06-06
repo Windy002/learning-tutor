@@ -1,0 +1,46 @@
+import type { Message } from '../types';
+import MarkdownContent from './MarkdownContent';
+import { useApi } from '../hooks/useApi';
+import { useStore } from '../store';
+
+interface Props {
+  message: Message;
+}
+
+export default function SummaryCard({ message }: Props) {
+  const { addNote } = useApi();
+  const currentBook = useStore((s) => s.currentBook);
+  const currentSession = useStore((s) => s.currentSession);
+
+  const handleSaveToNotes = async () => {
+    if (!currentBook || !currentSession) return;
+    try {
+      await addNote(currentBook.id, message.content, currentSession.id);
+      alert('已保存到笔记');
+    } catch {
+      alert('保存失败');
+    }
+  };
+
+  return (
+    <div className="flex gap-3 mb-5">
+      <div className="w-7 h-7 bg-brand rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="text-white text-[10px] font-bold">AI</span>
+      </div>
+      <div className="flex-1 max-w-[75%]">
+        <div className="bg-card-bg border-2 border-brand/20 rounded-xl px-5 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-brand">📋 全景总结</span>
+            <button
+              onClick={handleSaveToNotes}
+              className="text-xs text-brand hover:text-orange-700 font-medium underline underline-offset-2"
+            >
+              保存到笔记
+            </button>
+          </div>
+          <MarkdownContent content={message.content} />
+        </div>
+      </div>
+    </div>
+  );
+}
