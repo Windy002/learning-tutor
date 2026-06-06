@@ -77,9 +77,6 @@ export default function SettingsPanel() {
     }
   };
 
-  // Unique key for datalist to force re-render when suggestions change
-  const datalistId = 'model-suggestions';
-
   return (
     <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center" onClick={toggleSettings}>
       <div
@@ -115,20 +112,28 @@ export default function SettingsPanel() {
 
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">模型</label>
-            <input
-              list={datalistId}
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              placeholder={provider ? suggestions[0] : '输入模型名...'}
-              className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
-            />
-            <datalist id={datalistId}>
-              {suggestions.map(s => (
-                <option key={s} value={s} />
-              ))}
-            </datalist>
+            {provider ? (
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="w-full text-sm text-text-primary bg-page border border-border rounded-lg px-3 py-2 outline-none"
+              >
+                {suggestions.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+                <option value={model} hidden>{model}</option>
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="输入模型名..."
+                className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
+              />
+            )}
             <p className="text-[11px] text-text-muted mt-1">
-              下拉选择或手动输入
+              {provider ? '下拉选择' : '手动输入模型名'}
             </p>
           </div>
 
