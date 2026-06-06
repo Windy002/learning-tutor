@@ -1,4 +1,38 @@
+import { useMemo } from 'react';
 import { useStore } from '../store';
+
+const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
+  {
+    provider: 'DeepSeek',
+    pattern: /deepseek/,
+    models: ['deepseek-chat', 'deepseek-reasoner'],
+  },
+  {
+    provider: 'Anthropic (Claude)',
+    pattern: /anthropic/,
+    models: ['claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001'],
+  },
+  {
+    provider: 'OpenAI',
+    pattern: /openai/,
+    models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'o4-mini'],
+  },
+];
+
+function detectProvider(apiBase: string): string | null {
+  if (!apiBase.trim()) return null;
+  for (const p of ALL_MODELS) {
+    if (p.pattern.test(apiBase)) return p.provider;
+  }
+  return null;
+}
+
+function getModelSuggestions(apiBase: string): string[] {
+  for (const p of ALL_MODELS) {
+    if (p.pattern.test(apiBase)) return p.models;
+  }
+  return ALL_MODELS.flatMap(p => p.models);
+}
 
 export default function SettingsPanel() {
   const isOpen = useStore((s) => s.isSettingsOpen);
@@ -10,12 +44,30 @@ export default function SettingsPanel() {
   const setApiBase = useStore((s) => s.setApiBase);
   const setModel = useStore((s) => s.setModel);
 
+  const provider = useMemo(() => detectProvider(apiBase), [apiBase]);
+  const suggestions = useMemo(() => getModelSuggestions(apiBase), [apiBase]);
+
   if (!isOpen) return null;
+
+  const handleApiBaseChange = (value: string) => {
+    setApiBase(value);
+    // Auto-select first model of detected provider
+    const detected = detectProvider(value);
+    if (detected) {
+      const p = ALL_MODELS.find(x => x.provider === detected);
+      if (p && !p.models.includes(model)) {
+        setModel(p.models[0]);
+      }
+    }
+  };
+
+  // Unique key for datalist to force re-render when suggestions change
+  const datalistId = 'model-suggestions';
 
   return (
     <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center" onClick={toggleSettings}>
       <div
-        className="bg-white rounded-xl shadow-xl w-[380px] max-h-[80vh] overflow-y-auto"
+        className="bg-white rounded-xl shadow-xl w-[400px] max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
@@ -25,6 +77,46 @@ export default function SettingsPanel() {
 
         <div className="p-5 space-y-4">
           <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">API Base URL</label>
+            <input
+              type="text"
+              value={apiBase}
+              onChange={(e) => handleApiBaseChange(e.target.value)}
+              placeholder="https://api.deepseek.com"
+              className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
+            />
+            {provider && (
+              <p className="text-[11px] text-green-600 mt-1">
+                ✓ 识别为 {provider}
+              </p>
+            )}
+            {!provider && apiBase.trim() && (
+              <p className="text-[11px] text-amber-600 mt-1">
+                ⚠ 未识别，请手动输入模型名
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">模型</label>
+            <input
+              list={datalistId}
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder={provider ? suggestions[0] : '输入模型名...'}
+              className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
+            />
+            <datalist id={datalistId}>
+              {suggestions.map(s => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+            <p className="text-[11px] text-text-muted mt-1">
+              下拉选择或手动输入
+            </p>
+          </div>
+
+          <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">API Key</label>
             <input
               type="password"
@@ -33,42 +125,30 @@ export default function SettingsPanel() {
               placeholder="sk-..."
               className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
             />
-            <p className="text-[11px] text-text-muted mt-1">不会被上传到服务器，仅存在本地浏览器</p>
+            <p className="text-[11px] text-text-muted mt-1">仅存在浏览器本地，不会上传到服务器</p>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-text-secondary mb-1.5">API Base URL</label>
-            <input
-              type="text"
-              value={apiBase}
-              onChange={(e) => setApiBase(e.target.value)}
-              placeholder="https://api.deepseek.com"
-              className="w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-brand"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-text-secondary mb-1.5">模型</label>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full text-sm text-text-primary bg-page border border-border rounded-lg px-3 py-2 outline-none"
-            >
-              <option value="deepseek-chat">DeepSeek Chat</option>
-              <option value="deepseek-reasoner">DeepSeek Reasoner</option>
-              <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
-              <option value="claude-opus-4-8">Claude Opus 4.8</option>
-              <option value="claude-haiku-4-5">Claude Haiku 4.5</option>
-              <option value="gpt-4o">GPT-4o</option>
-              <option value="gpt-4.1">GPT-4.1</option>
-            </select>
-          </div>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs text-amber-800 leading-relaxed">
-              <strong>提示：</strong>如果使用 Anthropic (Claude) API，API Base 填 <code className="bg-amber-100 px-1 rounded">https://api.anthropic.com</code>。
-              使用 OpenAI 则填 <code className="bg-amber-100 px-1 rounded">https://api.openai.com</code>。
-            </p>
+          <div className="bg-page border border-border rounded-lg p-3 space-y-1.5">
+            <p className="text-xs text-text-secondary font-medium">预设 API Base：</p>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_MODELS.map(p => (
+                <button
+                  key={p.provider}
+                  onClick={() => handleApiBaseChange(
+                    p.provider.includes('DeepSeek') ? 'https://api.deepseek.com' :
+                    p.provider.includes('OpenAI') ? 'https://api.openai.com' :
+                    'https://api.anthropic.com'
+                  )}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                    provider === p.provider
+                      ? 'bg-brand/10 border-brand text-brand'
+                      : 'bg-white border-border text-text-secondary hover:border-text-muted'
+                  }`}
+                >
+                  {p.provider}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
