@@ -59,14 +59,7 @@ export default function TopBar() {
           title="API 设置"
           className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bubble transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8" cy="8" r="2" />
-            <path d="M8 1.33v1.1M8 13.57v1.1M3.27 3.27l.78.78M11.95 11.95l.78.78M1.33 8h1.1M13.57 8h1.1M3.27 12.73l.78-.78M11.95 4.05l.78-.78" />
-            <circle cx="8" cy="3" r="0.8" />
-            <circle cx="13" cy="8" r="0.8" />
-            <circle cx="8" cy="13" r="0.8" />
-            <circle cx="3" cy="8" r="0.8" />
-          </svg>
+          <span className="text-base">⚙️</span>
         </button>
       </div>
     </header>
