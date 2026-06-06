@@ -17,7 +17,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     port: 5173,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 15000,
     env: {
       LEARNING_TUTOR_DATA_DIR: TEST_DATA_DIR,

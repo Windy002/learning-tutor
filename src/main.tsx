@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { useStore } from './store';
+
+// Expose store for E2E tests
+(window as any).__STORE__ = useStore;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -113,3 +113,44 @@ test.describe('Phase switching', () => {
     }
   });
 });
+
+test.describe('Phase suggestion banner', () => {
+  test('appears when store has suggestedPhase and handles confirm', async ({ page }) => {
+    await page.goto('/');
+    // Inject suggested phase via store
+    await page.evaluate(() => {
+      const store = (window as any).__STORE__;
+      if (store) {
+        store.setState({
+          suggestedPhase: '精准补漏',
+          suggestedPhaseReason: '已完成摸底，识别到盲区',
+        });
+      }
+    });
+    await page.waitForTimeout(300);
+
+    // Banner should show
+    await expect(page.getByRole('button', { name: '确认切换' })).toBeVisible();
+    await expect(page.getByRole('button', { name: '忽略' })).toBeVisible();
+    await expect(page.getByText('已完成摸底，识别到盲区')).toBeVisible();
+
+    // Click confirm
+    await page.getByRole('button', { name: '确认切换' }).click();
+    await expect(page.getByRole('button', { name: '确认切换' })).not.toBeVisible();
+  });
+
+  test('clicking ignore dismisses the banner', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      const store = (window as any).__STORE__;
+      if (store) {
+        store.setState({ suggestedPhase: '全景收网' });
+      }
+    });
+    await page.waitForTimeout(300);
+
+    await expect(page.getByRole('button', { name: '忽略' })).toBeVisible();
+    await page.getByRole('button', { name: '忽略' }).click();
+    await expect(page.getByRole('button', { name: '忽略' })).not.toBeVisible();
+  });
+});
