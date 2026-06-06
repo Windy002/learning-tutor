@@ -3,6 +3,8 @@ import type { Book, Session, Message, Note } from '../types';
 
 const BASE = '/api';
 
+let currentAbortController: AbortController | null = null;
+
 interface ParsedMeta {
   phase?: string;
   round?: number;
@@ -148,12 +150,22 @@ export function useApi() {
     return message;
   };
 
+  const cancelAI = () => {
+    if (currentAbortController) {
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
+  };
+
   const askAI = async (userInput?: string) => {
     const book = store.currentBook;
     if (!book) {
       store.setError('请先选择或创建一本书');
       return;
     }
+
+    // Cancel any ongoing request
+    cancelAI();
 
     // If user typed something, add it first
     if (userInput?.trim()) {
@@ -187,9 +199,12 @@ export function useApi() {
     store.addMessage(aiMsg);
 
     try {
+      currentAbortController = new AbortController();
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: currentAbortController.signal,
         body: JSON.stringify({
           messages: store.messages.filter(m => m.id !== aiMsgId).map(m => ({
             role: m.role,
@@ -292,14 +307,22 @@ export function useApi() {
       // Auto-save session
       await saveCurrentSession();
     } catch (e: any) {
-      store.setError(e.message);
-      useStore.setState({
-        messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
-      });
+      // User cancelled — clean up placeholder, no error
+      if (e.name === 'AbortError') {
+        useStore.setState({
+          messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
+        });
+      } else {
+        store.setError(e.message);
+        useStore.setState({
+          messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
+        });
+      }
     } finally {
+      currentAbortController = null;
       store.setLoading(false);
     }
   };
 
-  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, sendMessage, askAI };
+  return { fetchBooks, createBook, fetchSessions, saveSession, addNote, sendMessage, askAI, cancelAI };
 }

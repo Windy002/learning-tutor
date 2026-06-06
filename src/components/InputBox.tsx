@@ -5,7 +5,7 @@ import { useApi } from '../hooks/useApi';
 export default function InputBox() {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendMessage, askAI } = useApi();
+  const { sendMessage, askAI, cancelAI } = useApi();
   const isLoading = useStore((s) => s.isLoading);
   const currentPhase = useStore((s) => s.currentPhase);
 
@@ -30,6 +30,7 @@ export default function InputBox() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isLoading) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -55,36 +56,46 @@ export default function InputBox() {
             className="flex-1 resize-none bg-transparent outline-none text-[15px] text-text-primary placeholder-text-muted leading-relaxed"
             disabled={isLoading}
           />
-          <button
-            onClick={handleSubmit}
-            disabled={!value.trim() || isLoading}
-            className="flex-shrink-0 w-8 h-8 bg-brand rounded-lg flex items-center justify-center
-              hover:bg-orange-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8l12-6-6 12-2-6-4-3z" fill="white" />
-            </svg>
-          </button>
+          {isLoading ? (
+            <button
+              onClick={cancelAI}
+              title="停止生成"
+              className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center
+                hover:bg-red-600 transition-colors animate-[pulse_2s_ease-in-out_infinite]"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="white">
+                <rect x="1" y="1" width="10" height="10" rx="1.5" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={!value.trim()}
+              className="flex-shrink-0 w-8 h-8 bg-brand rounded-lg flex items-center justify-center
+                hover:bg-orange-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8l12-6-6 12-2-6-4-3z" fill="white" />
+              </svg>
+            </button>
+          )}
         </div>
         <div className="flex justify-center mt-2">
-          <button
-            onClick={handleAskAI}
-            disabled={isLoading}
-            className={`text-xs px-4 py-1.5 rounded-full font-medium transition-all ${
-              isLoading
-                ? 'bg-bubble text-text-muted cursor-wait'
-                : 'bg-white border border-brand/30 text-brand hover:bg-brand/5'
-            }`}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
-                AI 思考中...
-              </span>
-            ) : (
-              `🤖 ${phaseLabel}`
-            )}
-          </button>
+          {isLoading ? (
+            <button
+              onClick={cancelAI}
+              className="text-xs px-4 py-1.5 rounded-full font-medium transition-all bg-red-50 border border-red-200 text-red-600 hover:bg-red-100"
+            >
+              ⏹ 停止生成
+            </button>
+          ) : (
+            <button
+              onClick={handleAskAI}
+              className="text-xs px-4 py-1.5 rounded-full font-medium transition-all bg-white border border-brand/30 text-brand hover:bg-brand/5"
+            >
+              🤖 {phaseLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>

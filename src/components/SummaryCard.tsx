@@ -11,14 +11,23 @@ export default function SummaryCard({ message }: Props) {
   const { addNote } = useApi();
   const currentBook = useStore((s) => s.currentBook);
   const currentSession = useStore((s) => s.currentSession);
+  const showToast = useStore((s) => s.showToast);
+  const updateBookNotes = useStore((s) => s.setCurrentBook);
 
   const handleSaveToNotes = async () => {
     if (!currentBook || !currentSession) return;
     try {
-      await addNote(currentBook.id, message.content, currentSession.id);
-      alert('已保存到笔记');
+      const note = await addNote(currentBook.id, message.content, currentSession.id);
+      // Also add to local store so sidebar updates immediately
+      if (currentBook) {
+        updateBookNotes({
+          ...currentBook,
+          notes: [...(currentBook.notes || []), note],
+        });
+      }
+      showToast('已保存到笔记');
     } catch {
-      alert('保存失败');
+      showToast('保存失败', 'error');
     }
   };
 

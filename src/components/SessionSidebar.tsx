@@ -21,7 +21,7 @@ export default function SessionSidebar() {
   const templateId = useStore((s) => s.templateId);
   const currentTemplate = useStore((s) => s.currentTemplate);
   const setTemplate = useStore((s) => s.setTemplate);
-  const { fetchBooks, createBook, fetchSessions, saveSession } = useApi();
+  const { fetchBooks, createBook, fetchSessions, saveSession, askAI } = useApi();
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
   const [showNewBook, setShowNewBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
@@ -50,6 +50,8 @@ export default function SessionSidebar() {
     };
     setCurrentSession(session);
     saveSession(session);
+    // Trigger AI to ask the first question
+    askAI();
   };
 
   const handleSelectSession = async (session: Session) => {

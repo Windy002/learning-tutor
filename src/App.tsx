@@ -5,6 +5,7 @@ import MessageList from './components/MessageList';
 import InputBox from './components/InputBox';
 import SessionSidebar from './components/SessionSidebar';
 import SettingsPanel from './components/SettingsPanel';
+import Toast from './components/Toast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         </div>
       </div>
       <SettingsPanel />
+      <Toast />
     </div>
   );
 }

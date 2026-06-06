@@ -44,6 +44,11 @@ interface AppState {
   setSuggestedPhase: (phase: string | null, reason?: string) => void;
   clearSuggestion: () => void;
 
+  // Toast
+  toast: { message: string; type: 'success' | 'error' } | null;
+  showToast: (message: string, type?: 'success' | 'error') => void;
+  clearToast: () => void;
+
   // Settings
   isSettingsOpen: boolean;
   toggleSettings: () => void;
@@ -111,6 +116,10 @@ export const useStore = create<AppState>((set) => ({
   suggestedPhaseReason: '',
   setSuggestedPhase: (phase, reason = '') => set({ suggestedPhase: phase, suggestedPhaseReason: reason }),
   clearSuggestion: () => set({ suggestedPhase: null, suggestedPhaseReason: '' }),
+
+  toast: null,
+  showToast: (message, type = 'success') => set({ toast: { message, type } }),
+  clearToast: () => set({ toast: null }),
 
   apiKey: loadSetting('apiKey', ''),
   apiBase: loadSetting('apiBase', 'https://api.deepseek.com'),
