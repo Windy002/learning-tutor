@@ -5,7 +5,7 @@ const ALL_MODELS: { provider: string; pattern: RegExp; models: string[] }[] = [
   {
     provider: 'DeepSeek',
     pattern: /deepseek/,
-    models: ['deepseek-v4-pro', 'deepseek-v4-flash', 'deepseek-v3.2', 'deepseek-r1'],
+    models: ['deepseek-v4-pro', 'deepseek-v4-flash', 'deepseek-v3.2'],
   },
   {
     provider: 'Anthropic (Claude)',
