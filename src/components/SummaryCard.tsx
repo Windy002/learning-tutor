@@ -36,7 +36,7 @@ export default function SummaryCard({ message }: Props) {
         <span className="text-white text-[11px] font-bold">AI</span>
       </div>
       <div className="flex-1 min-w-0 max-w-[85%]">
-        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
+        <div className="flex items-center gap-3 mb-2">
           <span className="text-sm font-semibold text-brand">📋 全景总结</span>
           <button
             onClick={handleSaveToNotes}

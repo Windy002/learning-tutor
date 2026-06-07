@@ -16,7 +16,7 @@ export default function FeedbackBlock({ message }: Props) {
       </div>
       <div className="flex-1 min-w-0 max-w-[85%]">
         {verdict && (
-          <div className="mb-2">
+          <div className="mb-1.5">
             <VerdictBadge verdict={verdict} />
           </div>
         )}

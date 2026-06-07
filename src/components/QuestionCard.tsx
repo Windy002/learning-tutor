@@ -16,7 +16,7 @@ export default function QuestionCard({ message }: Props) {
       </div>
       <div className="flex-1 min-w-0 max-w-[85%]">
         {qNum && (
-          <span className="inline-block text-[12px] text-text-muted font-semibold tracking-wide mb-2">
+          <span className="inline-block text-[12px] text-text-muted font-semibold tracking-wide mb-1.5">
             {total ? `第 ${qNum}/${total} 题` : `Q${qNum}`}
           </span>
         )}
