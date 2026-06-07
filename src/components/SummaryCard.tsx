@@ -18,7 +18,6 @@ export default function SummaryCard({ message }: Props) {
     if (!currentBook || !currentSession) return;
     try {
       const note = await addNote(currentBook.id, message.content, currentSession.id);
-      // Also add to local store so sidebar updates immediately
       if (currentBook) {
         updateBookNotes({
           ...currentBook,
@@ -32,23 +31,21 @@ export default function SummaryCard({ message }: Props) {
   };
 
   return (
-    <div className="flex gap-3 mb-5">
-      <div className="w-7 h-7 bg-brand rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-        <span className="text-white text-[10px] font-bold">AI</span>
+    <div className="flex gap-4 mb-6">
+      <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="text-white text-[11px] font-bold">AI</span>
       </div>
-      <div className="flex-1 max-w-[75%]">
-        <div className="bg-card-bg border-2 border-brand/20 rounded-xl px-5 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-brand">📋 全景总结</span>
-            <button
-              onClick={handleSaveToNotes}
-              className="text-xs text-brand hover:text-orange-700 font-medium underline underline-offset-2"
-            >
-              保存到笔记
-            </button>
-          </div>
-          <MarkdownContent content={message.content} />
+      <div className="flex-1 min-w-0 max-w-[85%]">
+        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
+          <span className="text-sm font-semibold text-brand">📋 全景总结</span>
+          <button
+            onClick={handleSaveToNotes}
+            className="text-xs text-brand hover:text-orange-700 font-medium underline underline-offset-2"
+          >
+            保存到笔记
+          </button>
         </div>
+        <MarkdownContent content={message.content} />
       </div>
     </div>
   );

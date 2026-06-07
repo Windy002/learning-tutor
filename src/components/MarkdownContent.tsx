@@ -22,14 +22,14 @@ export default function MarkdownContent({ content }: Props) {
   }, [content]);
 
   return (
-    <div ref={ref} className="prose prose-sm max-w-none text-text-primary
+    <div ref={ref} className="prose max-w-none text-text-primary
       prose-headings:text-text-primary prose-headings:font-semibold prose-headings:tracking-tight
       prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
       prose-h1:mt-6 prose-h1:mb-3 prose-h2:mt-5 prose-h2:mb-2 prose-h3:mt-4 prose-h3:mb-2
-      prose-p:text-text-primary prose-p:leading-7 prose-p:my-2
+      prose-p:text-text-primary prose-p:leading-7 prose-p:my-1.5
       prose-strong:text-text-primary prose-strong:font-semibold
       prose-li:text-text-primary prose-li:leading-7 prose-li:my-0.5
-      prose-ul:my-2 prose-ol:my-2 prose-li:marker:text-text-muted
+      prose-ul:my-1.5 prose-ol:my-1.5 prose-li:marker:text-text-muted
       prose-a:text-brand prose-a:no-underline hover:prose-a:underline
       prose-code:bg-[#f0ede6] prose-code:text-[#3d3929] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-code:font-normal
       prose-code:before:content-none prose-code:after:content-none

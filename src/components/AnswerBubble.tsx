@@ -1,4 +1,5 @@
 import type { Message } from '../types';
+import MarkdownContent from './MarkdownContent';
 
 interface Props {
   message: Message;
@@ -6,11 +7,15 @@ interface Props {
 
 export default function AnswerBubble({ message }: Props) {
   return (
-    <div className="flex justify-end mb-5">
-      <div className="max-w-[65%] bg-bubble rounded-2xl rounded-br px-4 py-2.5">
-        <p className="text-[15px] text-text-primary leading-relaxed whitespace-pre-wrap">
-          {message.content}
-        </p>
+    <div className="flex justify-end mb-6">
+      <div className="max-w-[80%] bg-bubble rounded-2xl rounded-br-sm px-5 py-3">
+        {message.content.length < 200 ? (
+          <p className="text-[16px] text-text-primary leading-7 whitespace-pre-wrap">
+            {message.content}
+          </p>
+        ) : (
+          <MarkdownContent content={message.content} />
+        )}
       </div>
     </div>
   );
