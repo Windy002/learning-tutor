@@ -212,21 +212,28 @@ export default function SessionSidebar() {
         <div className="w-72 h-full flex flex-col">
           {/* Header — Claude.ai style */}
           <div className="px-3 pt-4 pb-3">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
+            <div className="flex items-center mb-4">
+              <a className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" onClick={(e) => e.preventDefault()}>
                 <div className="w-7 h-7 bg-brand rounded-[9px] flex items-center justify-center flex-shrink-0">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 7l3 3 5-6" />
                   </svg>
                 </div>
                 <span className="text-[14px] font-semibold text-text-primary">学习导师</span>
+              </a>
+              <div className="ml-auto flex items-center gap-1">
+                <button onClick={toggleSettings} title="设置" className="w-6 h-6 rounded-md flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-active-bg transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="8" cy="8" r="2.5" />
+                    <path d="M8 1.5v1.5M8 13v1.5M3.4 3.4l1 1M11.6 11.6l1 1M1.5 8H3M13 8h1.5M3.4 12.6l1-1M11.6 4.4l1-1" />
+                  </svg>
+                </button>
+                <button onClick={toggleSidebar} title="关闭侧栏" className="w-6 h-6 rounded-md flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-active-bg transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11" />
+                  </svg>
+                </button>
               </div>
-              <button onClick={toggleSettings} title="设置" className="w-7 h-7 rounded-[9px] flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-active-bg transition-colors">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="8" cy="8" r="2.5" />
-                  <path d="M8 1.5v1.5M8 13v1.5M3.4 3.4l1 1M11.6 11.6l1 1M1.5 8H3M13 8h1.5M3.4 12.6l1-1M11.6 4.4l1-1" />
-                </svg>
-              </button>
             </div>
 
             {/* Phase suggestion */}

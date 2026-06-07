@@ -35,7 +35,7 @@ test.describe('Sidebar', () => {
 
   test('toggles sidebar via hamburger button', async ({ page }) => {
     await page.goto('/');
-    // Hamburger is the second button in sidebar header (after settings)
+    // Close sidebar button is in sidebar top-right
     await page.locator('aside button[title="关闭侧栏"]').click();
     await expect(page.locator('aside')).toHaveClass(/w-0/);
     await page.keyboard.press('Control+b');
