@@ -26,21 +26,19 @@ test.describe('Sidebar', () => {
     // Focus page first, then close sidebar with keyboard
     await page.locator('body').click();
     await page.keyboard.press('Control+b');
-    // Sidebar should collapse (the 'w-[260px]' class should be removed)
-    await expect(page.locator('aside')).not.toHaveClass(/w-\[260px\]/);
+    // Sidebar should collapse (288px = w-72)
+    await expect(page.locator('aside')).toHaveClass(/w-0/);
     // Re-open
     await page.keyboard.press('Control+b');
     await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
   });
 
-  test('toggles sidebar via toolbar button', async ({ page }) => {
+  test('toggles sidebar via hamburger button', async ({ page }) => {
     await page.goto('/');
-    // Sidebar open by default — click hamburger to close
-    await page.locator('header button').first().click();
-    // Sidebar should collapse
+    // Hamburger is the second button in sidebar header (after settings)
+    await page.locator('aside button[title="关闭侧栏"]').click();
     await expect(page.locator('aside')).toHaveClass(/w-0/);
-    // Click again to open
-    await page.locator('header button').first().click();
+    await page.keyboard.press('Control+b');
     await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
   });
 });
