@@ -170,7 +170,9 @@ export function useApi() {
       return;
     }
     if (!store.apiKey || !store.apiKey.trim()) {
-      store.showToast('请先设置 API Key（点击右上角 ⚙️）', 'error');
+      store.showToast('请先设置 API Key', 'error');
+      const state = useStore.getState();
+      if (!state.isSettingsOpen) state.toggleSettings();
       return;
     }
 
@@ -317,16 +319,25 @@ export function useApi() {
       // Auto-save session
       await saveCurrentSession();
     } catch (e: any) {
-      // User cancelled — clean up placeholder, no error
+      const msgs = useStore.getState().messages;
       if (e.name === 'AbortError') {
-        useStore.setState({
-          messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
-        });
+        // Mark partial response as stopped, don't show error
+        const updated = msgs.map(m =>
+          m.id === aiMsgId && m.content
+            ? { ...m, content: m.content + '\n\n*(已停止生成)*' }
+            : m.id === aiMsgId && !m.content
+              ? null  // remove empty placeholder
+              : m
+        ).filter(Boolean) as Message[];
+        useStore.setState({ messages: updated });
       } else {
-        store.setError(e.message);
-        useStore.setState({
-          messages: useStore.getState().messages.filter(m => m.id !== aiMsgId)
-        });
+        // Keep AI placeholder but show error, so user can retry
+        const updated = msgs.map(m =>
+          m.id === aiMsgId
+            ? { ...m, content: `❌ 请求失败: ${e.message}\n\n请检查 API Key 和网络后重试` }
+            : m
+        );
+        useStore.setState({ messages: updated, error: e.message });
       }
     } finally {
       currentAbortController = null;

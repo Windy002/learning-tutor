@@ -59,6 +59,7 @@ export default function SettingsPanel() {
   const setApiKey = useStore((s) => s.setApiKey);
   const setApiBase = useStore((s) => s.setApiBase);
   const setModel = useStore((s) => s.setModel);
+  const showToast = useStore((s) => s.showToast);
 
   const provider = useMemo(() => detectProvider(apiBase), [apiBase]);
   const suggestions = useMemo(() => getModelSuggestions(apiBase), [apiBase]);
@@ -67,6 +68,14 @@ export default function SettingsPanel() {
 
   const handleApiBaseChange = (value: string) => {
     setApiBase(value);
+  };
+
+  const handleClose = () => {
+    if (!apiKey.trim()) {
+      showToast('请填写 API Key 后再关闭', 'error');
+      return;
+    }
+    toggleSettings();
   };
 
   return (
@@ -169,7 +178,7 @@ export default function SettingsPanel() {
 
         <div className="px-5 py-3 border-t border-border flex justify-end">
           <button
-            onClick={toggleSettings}
+            onClick={handleClose}
             className="text-xs bg-brand text-white rounded-lg px-4 py-1.5 hover:bg-orange-700"
           >
             完成

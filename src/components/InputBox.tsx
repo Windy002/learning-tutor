@@ -8,6 +8,8 @@ export default function InputBox() {
   const { sendMessage, askAI, cancelAI } = useApi();
   const isLoading = useStore((s) => s.isLoading);
   const currentPhase = useStore((s) => s.currentPhase);
+  const messages = useStore((s) => s.messages);
+  const prevLoading = useRef(false);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -17,6 +19,14 @@ export default function InputBox() {
     }
   }, [value]);
 
+  // Auto-focus textarea when AI finishes responding
+  useEffect(() => {
+    if (prevLoading.current && !isLoading) {
+      textareaRef.current?.focus();
+    }
+    prevLoading.current = isLoading;
+  }, [isLoading]);
+
   const handleSubmit = () => {
     if (!value.trim()) return;
     sendMessage(value);
@@ -24,8 +34,15 @@ export default function InputBox() {
   };
 
   const handleAskAI = async () => {
-    const input = value.trim() || undefined;
+    let input = value.trim() || undefined;
     setValue('');
+    // If no input and last message is a user message, retry it
+    if (!input) {
+      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+      if (lastUserMsg) {
+        input = lastUserMsg.content;
+      }
+    }
     await askAI(input);
   };
 
@@ -37,10 +54,15 @@ export default function InputBox() {
     }
   };
 
-  const phaseLabel =
-    currentPhase === '摸底测试' ? '让 AI 出题' :
-    currentPhase === '精准补漏' || currentPhase === '循环迭代' ? '提交并获取反馈' :
-    '生成总结';
+  const lastAiFailed = messages.length > 0 &&
+    messages[messages.length - 1]?.role === 'assistant' &&
+    messages[messages.length - 1]?.content?.startsWith('❌');
+
+  const phaseLabel = lastAiFailed
+    ? '重试'
+    : currentPhase === '摸底测试' ? '让 AI 出题'
+    : currentPhase === '精准补漏' || currentPhase === '循环迭代' ? '提交并获取反馈'
+    : '生成总结';
 
   return (
     <div className="border-t border-border bg-page px-5 py-3">
