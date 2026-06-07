@@ -34,7 +34,7 @@ export default function MessageList() {
 
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto chat-scroll px-5 py-6">
-      <div className="max-w-[800px] mx-auto">
+      <div className="max-w-3xl mx-auto">
         {messages.length === 0 && (
           <div className="text-center text-text-muted mt-20">
             <p className="text-lg mb-3">👋 开始你的学习旅程</p>
