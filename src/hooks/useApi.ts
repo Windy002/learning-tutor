@@ -218,12 +218,19 @@ export function useApi() {
         headers: { 'Content-Type': 'application/json' },
         signal: currentAbortController.signal,
         body: JSON.stringify({
-          messages: store.messages.filter(m => m.id !== aiMsgId).map(m => ({
-            role: m.role,
-            content: m.content,
-            phase: m.phase,
-            round: m.round,
-          })),
+          messages: (() => {
+            const history = store.messages.filter(m => m.id !== aiMsgId).map(m => ({
+              role: m.role,
+              content: m.content,
+              phase: m.phase,
+              round: m.round,
+            }));
+            // DeepSeek API requires at least one message; provide kickoff if empty
+            if (history.length === 0) {
+              return [{ role: 'user' as const, content: `开始学习《${book.title}》，当前阶段：${store.currentPhase}` }];
+            }
+            return history;
+          })(),
           systemPrompt: store.currentTemplate.buildSystemPrompt(
             book.title, book.domain, book.goal, store.currentPhase
           ),
