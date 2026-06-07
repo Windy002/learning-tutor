@@ -214,9 +214,11 @@ export default function SessionSidebar() {
                     <button
                       onClick={() => handleDeleteBook(currentBook)}
                       title="删除此书"
-                      className="text-xs text-text-muted hover:text-red-500 px-1.5 py-1 transition-colors"
+                      className="text-text-muted hover:text-red-500 px-1.5 py-1 transition-colors"
                     >
-                      🗑
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+                        <path d="M2 3.5h10M5 3.5V2.5a1 1 0 011-1h2a1 1 0 011 1v1M11 3.5v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8" />
+                      </svg>
                     </button>
                   )}
                 </div>
@@ -271,9 +273,11 @@ export default function SessionSidebar() {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteSession(s); }}
                         title="删除会话"
-                        className="text-text-muted hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                        className="text-text-muted hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        🗑
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+                          <path d="M2 3.5h10M5 3.5V2.5a1 1 0 011-1h2a1 1 0 011 1v1M11 3.5v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8" />
+                        </svg>
                       </button>
                     </div>
                   ))
