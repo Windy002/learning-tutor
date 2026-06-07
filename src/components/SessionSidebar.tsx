@@ -219,21 +219,6 @@ export default function SessionSidebar() {
               <span className="text-sm font-semibold text-text-primary">学习导师</span>
             </div>
 
-            {/* Phase + round */}
-            <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
-              <span className="font-medium text-text-secondary">{currentPhase}</span>
-              <span>·</span>
-              <span>第 {currentRound} 轮</span>
-              <select
-                value={currentPhase}
-                onChange={(e) => setCurrentPhase(e.target.value as any)}
-                className="ml-auto text-[11px] text-text-muted bg-transparent border border-border rounded px-1.5 py-0.5 outline-none cursor-pointer"
-              >
-                {currentTemplate.phases.map((p) => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
-                ))}
-              </select>
-            </div>
 
             {/* Phase suggestion */}
             {suggestedPhase && (
@@ -439,10 +424,13 @@ export default function SessionSidebar() {
             </div>
           )}
           {/* Footer */}
-          <div className="mt-auto border-t border-border px-3 py-2 flex items-center justify-between">
-            <span className="text-[11px] text-text-muted">
-              {currentBook ? `📖 ${currentBook.title}` : '未选择书籍'}
-            </span>
+          <div className="mt-auto border-t border-border px-3 py-2 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-text-muted">
+                {currentBook ? currentBook.title : '未选择'}
+              </span>
+              <span className="text-[10px] text-text-muted">{currentPhase}</span>
+            </div>
             <button
               onClick={toggleSettings}
               title="设置"

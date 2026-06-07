@@ -7,10 +7,10 @@ test.describe('App shell', () => {
     await expect(page.locator('text=你好，我是学习导师')).toBeVisible();
   });
 
-  test('shows sidebar with phase display', async ({ page }) => {
+  test('shows sidebar with default phase in footer', async ({ page }) => {
     await page.goto('/');
-    // Sidebar is open by default — check phase info is visible (first match is the phase label span)
-    await expect(page.getByRole('complementary').locator('text=摸底测试').first()).toBeVisible();
+    // Phase now shown in footer
+    await expect(page.getByRole('complementary').getByText('摸底测试', { exact: true })).toBeVisible();
   });
 });
 
@@ -114,24 +114,29 @@ test.describe('Messaging', () => {
   });
 });
 
-test.describe('Phase switching', () => {
-  test('shows phase in sidebar and can switch via dropdown', async ({ page }) => {
+test.describe('Phase display', () => {
+  test('shows default phase in sidebar footer', async ({ page }) => {
     await page.goto('/');
-    // Sidebar shows default phase (first match is the phase label span)
-    await expect(page.getByRole('complementary').locator('text=摸底测试').first()).toBeVisible();
-    // Phase select is now in sidebar
-    const select = page.getByRole('complementary').locator('select').first();
-    await select.selectOption('全景收网');
-    await expect(page.getByRole('complementary').locator('text=全景收网').first()).toBeVisible();
+    await expect(page.getByRole('complementary').getByText('摸底测试', { exact: true })).toBeVisible();
   });
 
-  test('cycles through all phases via sidebar', async ({ page }) => {
+  test('phase changes via suggestion confirm', async ({ page }) => {
     await page.goto('/');
-    const select = page.getByRole('complementary').locator('select').first();
-    for (const phase of ['精准补漏', '循环迭代', '全景收网', '摸底测试']) {
-      await select.selectOption(phase);
-      await expect(page.getByRole('complementary').locator('text=' + phase).first()).toBeVisible();
-    }
+    // Trigger phase suggestion
+    await page.evaluate(() => {
+      const store = (window as any).__STORE__;
+      if (store) {
+        store.setState({
+          suggestedPhase: '精准补漏',
+          suggestedPhaseReason: '测试切换',
+        });
+      }
+    });
+    await page.waitForTimeout(200);
+    // Confirm the suggestion
+    await page.getByRole('complementary').getByRole('button', { name: '确认' }).click();
+    // Phase should update in footer
+    await expect(page.getByRole('complementary').getByText('精准补漏', { exact: true })).toBeVisible();
   });
 });
 
