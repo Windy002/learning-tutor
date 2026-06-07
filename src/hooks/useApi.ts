@@ -326,8 +326,9 @@ export function useApi() {
       // Parse META after stream completes
       const currentState = useStore.getState();
       const currentMsg = currentState.messages.find(m => m.id === aiMsgId);
-      if (currentMsg?.content) {
-        const { cleaned, meta } = parseMeta(currentMsg.content);
+      if (currentMsg) {
+        const content = currentMsg.content || '*(AI 未返回内容，请重试)*';
+        const { cleaned, meta } = parseMeta(content);
 
         if (meta?.type) {
           const updated = currentState.messages.map(m => {
