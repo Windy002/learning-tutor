@@ -8,10 +8,6 @@ router.post('/', async (req, res) => {
   try {
     const { messages, systemPrompt, apiKey, apiBase, model } = req.body;
 
-    if (!messages?.length) {
-      return res.status(400).json({ error: 'messages array required' });
-    }
-
     if (!apiKey) {
       return res.status(400).json({ error: '请先点击右上角齿轮图标设置 API Key' });
     }
