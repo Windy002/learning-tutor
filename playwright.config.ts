@@ -15,12 +15,13 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'npm run dev',
+    command: `npx concurrently "vite" "tsx server/index.ts"`,
     port: 5173,
     reuseExistingServer: false,
     timeout: 15000,
     env: {
       LEARNING_TUTOR_DATA_DIR: TEST_DATA_DIR,
+      PATH: process.env.PATH,
     },
   },
 });
