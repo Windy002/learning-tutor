@@ -243,10 +243,10 @@ export default function SessionSidebar() {
               </div>
             )}
 
-            {/* New session button — prominent, Claude.ai style */}
+            {/* New session button — Claude.ai style: 12px, 9px radius, 6px 16px */}
             <button
               onClick={handleNewSession}
-              className="w-full text-[13px] font-medium border border-border rounded-full py-2 px-4 mb-3 hover:bg-page transition-colors text-text-secondary hover:text-text-primary"
+              className="w-full text-xs font-medium border border-border rounded-[9px] py-1.5 px-4 mb-3 hover:bg-active-bg transition-colors text-text-primary"
             >
               + 新会话
             </button>
@@ -305,10 +305,7 @@ export default function SessionSidebar() {
 
           {activeTab === 'sessions' ? (
             <>
-              {/* Session list */}
-
-              {/* Session list */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto px-2">
                 {sessions.length === 0 ? (
                   <p className="text-xs text-text-muted text-center mt-8 px-4">
                     {currentBook ? '点击「+ 新会话」开始' : '先选一本书'}
@@ -317,19 +314,16 @@ export default function SessionSidebar() {
                   sessions.map((s) => (
                     <div
                       key={s.id}
-                      className={`flex items-center hover:bg-page transition-colors relative ${
-                        currentSession?.id === s.id ? 'bg-page border-l-2 border-l-brand' : ''
+                      className={`flex items-center px-2 transition-colors relative ${
+                        currentSession?.id === s.id ? 'bg-active-bg rounded-[9px]' : 'hover:bg-active-bg/50 rounded-[9px]'
                       }`}
+                      onClick={() => handleSelectSession(s)}
                     >
-                      <button
-                        onClick={() => handleSelectSession(s)}
-                        className="flex-1 text-left px-3 py-2.5 min-w-0"
-                      >
-                        <p className="text-[13px] text-text-primary truncate leading-snug">
+                      <button className="flex-1 text-left px-2 py-1.5 min-w-0">
+                        <p className={`text-xs truncate leading-snug ${
+                          currentSession?.id === s.id ? 'text-active-text font-medium' : 'text-text-primary'
+                        }`}>
                           {getSessionTitle(s)}
-                        </p>
-                        <p className="text-[11px] text-text-muted mt-0.5">
-                          {new Date(s.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                         </p>
                       </button>
                       <button

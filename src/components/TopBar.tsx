@@ -5,7 +5,7 @@ export default function TopBar() {
   const toggleSettings = useStore((s) => s.toggleSettings);
 
   return (
-    <header className="sticky top-0 z-10 bg-page border-b border-border h-12 flex items-center justify-between px-3">
+    <header className="sticky top-0 z-10 bg-page h-12 flex items-center justify-between px-3">
       <button
         onClick={toggleNotes}
         title="侧栏"
