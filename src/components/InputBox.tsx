@@ -5,7 +5,7 @@ import { useApi } from '../hooks/useApi';
 export default function InputBox() {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendMessage, askAI, cancelAI } = useApi();
+  const { askAI, cancelAI } = useApi();
   const isLoading = useStore((s) => s.isLoading);
   const currentPhase = useStore((s) => s.currentPhase);
   const messages = useStore((s) => s.messages);
@@ -27,30 +27,28 @@ export default function InputBox() {
     prevLoading.current = isLoading;
   }, [isLoading]);
 
-  const handleSubmit = () => {
-    if (!value.trim()) return;
-    sendMessage(value);
-    setValue('');
-  };
-
-  const handleAskAI = async () => {
-    let input = value.trim() || undefined;
-    setValue('');
-    // If no input and last message is a user message, retry it
-    if (!input) {
-      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-      if (lastUserMsg) {
-        input = lastUserMsg.content;
-      }
+  const handleSend = async () => {
+    if (isLoading) return;
+    // If input has text, send it to AI
+    if (value.trim()) {
+      const input = value.trim();
+      setValue('');
+      await askAI(input);
+      return;
     }
-    await askAI(input);
+    // If empty, retry last user message
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMsg) {
+      setValue('');
+      await askAI(lastUserMsg.content);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isLoading) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      handleSend();
     }
   };
 
@@ -91,31 +89,15 @@ export default function InputBox() {
             </button>
           ) : (
             <button
-              onClick={handleSubmit}
+              onClick={handleSend}
               disabled={!value.trim()}
+              title={phaseLabel}
               className="flex-shrink-0 w-8 h-8 bg-brand rounded-lg flex items-center justify-center
                 hover:bg-orange-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 8l12-6-6 12-2-6-4-3z" fill="white" />
               </svg>
-            </button>
-          )}
-        </div>
-        <div className="flex justify-center mt-2">
-          {isLoading ? (
-            <button
-              onClick={cancelAI}
-              className="text-xs px-4 py-1.5 rounded-full font-medium transition-all bg-red-50 border border-red-200 text-red-600 hover:bg-red-100"
-            >
-              ⏹ 停止生成
-            </button>
-          ) : (
-            <button
-              onClick={handleAskAI}
-              className="text-xs px-4 py-1.5 rounded-full font-medium transition-all bg-white border border-brand/30 text-brand hover:bg-brand/5"
-            >
-              🤖 {phaseLabel}
             </button>
           )}
         </div>

@@ -209,17 +209,12 @@ export function useApi() {
       store.showToast('请先选择或创建一本书', 'error');
       return;
     }
-    if (!store.apiKey || !store.apiKey.trim()) {
-      store.showToast('请先设置 API Key', 'error');
-      const state = useStore.getState();
-      if (!state.isSettingsOpen) state.toggleSettings();
-      return;
-    }
 
     // Cancel any ongoing request
     cancelAI();
 
-    // If user typed something, add it first
+    // If user typed something, add it first — do this BEFORE validation
+    // so the message persists even if API call fails
     if (userInput?.trim()) {
       store.addMessage({
         id: `msg_${Date.now()}`,
@@ -230,6 +225,13 @@ export function useApi() {
         content: userInput.trim(),
         timestamp: new Date().toISOString(),
       });
+    }
+
+    if (!store.apiKey || !store.apiKey.trim()) {
+      store.showToast('请先设置 API Key', 'error');
+      const state = useStore.getState();
+      if (!state.isSettingsOpen) state.toggleSettings();
+      return;
     }
 
     store.setLoading(true);

@@ -74,24 +74,39 @@ test.describe('Create book and session', () => {
 });
 
 test.describe('Messaging', () => {
-  test('sends a message and displays it as answer bubble', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Ensure a book exists for messaging tests
+    await page.evaluate(() => {
+      const store = (window as any).__STORE__;
+      if (store) {
+        const book = {
+          id: 'book_test_msg',
+          title: '测试书',
+          domain: '测试',
+          goal: '测试',
+          createdAt: new Date().toISOString(),
+          notes: [],
+        };
+        store.setState({ currentBook: book, books: [book] });
+      }
+    });
+    await page.waitForTimeout(200);
+  });
+
+  test('sends a message and displays it as answer bubble', async ({ page }) => {
     const textarea = page.locator('textarea');
     await textarea.fill('这是我的回答');
-    // Click send button
     await page.locator('button:has(svg)').last().click();
-    // Message should appear
     await expect(page.locator('text=这是我的回答')).toBeVisible();
   });
 
   test('does not send empty message', async ({ page }) => {
-    await page.goto('/');
     const btn = page.locator('button:has(svg)').last();
     await expect(btn).toBeDisabled();
   });
 
   test('sends message on Enter key', async ({ page }) => {
-    await page.goto('/');
     const textarea = page.locator('textarea');
     await textarea.fill('快捷键测试');
     await textarea.press('Enter');
