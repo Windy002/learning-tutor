@@ -12,19 +12,59 @@ interface ParsedMeta {
   verdict?: 'correct' | 'partial' | 'wrong';
 }
 
-const META_REGEX = /\[META:\s*(\{.*?\})\]/s;
+// Catch any [META:...] line — robust against missing braces, quotes, commas
+const META_REGEX = /\[META:\s*(.+?)\]\s*$/ms;
 
 function parseMeta(content: string): { cleaned: string; meta: ParsedMeta | null } {
   const match = content.match(META_REGEX);
   if (!match) return { cleaned: content, meta: null };
 
+  // Always strip META line from displayed content
+  const cleaned = content.replace(match[0], '').trimEnd();
+
+  const raw = match[1];
+
+  // Try strict JSON first
   try {
-    const meta = JSON.parse(match[1]) as ParsedMeta;
-    const cleaned = content.replace(match[0], '').trim();
+    const meta = JSON.parse(raw) as ParsedMeta;
     return { cleaned, meta };
-  } catch {
-    return { cleaned: content, meta: null };
+  } catch {}
+
+  // Try wrapping in braces if missing
+  if (!raw.startsWith('{')) {
+    try {
+      const meta = JSON.parse(`{${raw}}`) as ParsedMeta;
+      return { cleaned, meta };
+    } catch {}
   }
+
+  // Key=value format: phase=摸底测试 round=1 type=question
+  const kvMeta: ParsedMeta = {};
+  const kvRegex = /(\w+)\s*=\s*"?([^"\s]+)"?/g;
+  let kvMatch;
+  while ((kvMatch = kvRegex.exec(raw)) !== null) {
+    const key = kvMatch[1] as keyof ParsedMeta;
+    const val = kvMatch[2];
+    if (key === 'round') kvMeta.round = parseInt(val) || undefined;
+    else if (key === 'phase') kvMeta.phase = val;
+    else if (key === 'type') kvMeta.type = val as ParsedMeta['type'];
+    else if (key === 'verdict') kvMeta.verdict = val as ParsedMeta['verdict'];
+  }
+  if (Object.keys(kvMeta).length > 0) {
+    return { cleaned, meta: kvMeta };
+  }
+
+  // Last resort: salvage with lenient pattern matching
+  const salvage: ParsedMeta = {};
+  const p = raw.match(/(?:phase\s*[:=]\s*"?)([^",}\s]+)/i);
+  const r = raw.match(/(?:round\s*[:=]\s*)(\d+)/i);
+  const t = raw.match(/(?:type\s*[:=]\s*"?)(question|feedback|summary)/i);
+  const v = raw.match(/(?:verdict\s*[:=]\s*"?)(correct|partial|wrong)/i);
+  if (p) salvage.phase = p[1];
+  if (r) salvage.round = parseInt(r[1]);
+  if (t) salvage.type = t[1].toLowerCase() as ParsedMeta['type'];
+  if (v) salvage.verdict = v[1].toLowerCase() as ParsedMeta['verdict'];
+  return { cleaned, meta: Object.keys(salvage).length > 0 ? salvage : null };
 }
 
 async function saveCurrentSession() {

@@ -46,7 +46,7 @@ export const templates: Template[] = [
 
 **每条回复末尾必须附加一行元数据标记（不要放在代码块内）：**
 
-[META:{"phase":"当前阶段名","round":轮次数字,"type":"消息类型","verdict":"判断"}]
+[META: phase=当前阶段名 round=轮次数字 type=消息类型 verdict=判断]
 
 - phase: 当前教学阶段（摸底测试/精准补漏/循环迭代/全景收网）
 - round: 当前轮次（整数，摸底测试时每题递增，其他阶段每轮 Q&A 递增）
@@ -54,8 +54,8 @@ export const templates: Template[] = [
 - verdict: "correct"/"partial"/"wrong"，仅 feedback 类型必填，question 和 summary 可省略此字段
 
 示例：
-[META:{"phase":"摸底测试","round":1,"type":"question"}]
-[META:{"phase":"精准补漏","round":2,"type":"feedback","verdict":"wrong"}]`,
+[META: phase=摸底测试 round=1 type=question]
+[META: phase=精准补漏 round=2 type=feedback verdict=wrong]`,
   },
   {
     id: 'socratic',
@@ -91,7 +91,7 @@ export const templates: Template[] = [
 
 **每条回复末尾必须附加一行元数据标记：**
 
-[META:{"phase":"当前阶段名","round":轮次数字,"type":"消息类型"}]
+[META: phase=当前阶段名 round=轮次数字 type=消息类型]
 
 - phase: 当前教学阶段（引出观点/深层追问/重构认知）
 - round: 当前轮次（整数）
@@ -131,7 +131,7 @@ export const templates: Template[] = [
 
 **每条回复末尾必须附加一行元数据标记：**
 
-[META:{"phase":"当前阶段名","round":轮次数字,"type":"消息类型","verdict":"判断"}]
+[META: phase=当前阶段名 round=轮次数字 type=消息类型 verdict=判断]
 
 - phase: 当前教学阶段（白话解释/挑战模糊/极致简化）
 - round: 当前轮次（整数）
