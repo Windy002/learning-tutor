@@ -210,19 +210,20 @@ export default function SessionSidebar() {
         `}
       >
         <div className="w-[260px] h-full flex flex-col">
-          {/* Header — logo + title + tabs */}
-          <div className="px-3 pt-3 pb-2">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 bg-brand rounded flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[10px] font-bold">学</span>
+          {/* Header — Claude.ai style */}
+          <div className="px-3 pt-4 pb-3">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 bg-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 8l3 3 5-6" />
+                </svg>
               </div>
-              <span className="text-sm font-semibold text-text-primary">学习导师</span>
+              <span className="text-[15px] font-semibold text-text-primary">学习导师</span>
             </div>
-
 
             {/* Phase suggestion */}
             {suggestedPhase && (
-              <div className="mb-2 text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 text-amber-700">
+              <div className="mb-3 text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 text-amber-700">
                 <p>🎯 建议切换至「{suggestedPhase}」</p>
                 <p className="opacity-70 mt-0.5">{suggestedPhaseReason}</p>
                 <div className="flex gap-2 mt-1.5">
@@ -242,24 +243,59 @@ export default function SessionSidebar() {
               </div>
             )}
 
-            {/* Tab switcher */}
-            <div className="flex bg-bubble rounded-lg p-0.5 gap-0.5 mb-2">
+            {/* New session button — prominent, Claude.ai style */}
+            <button
+              onClick={handleNewSession}
+              className="w-full text-[13px] font-medium border border-border rounded-full py-2 px-4 mb-3 hover:bg-page transition-colors text-text-secondary hover:text-text-primary"
+            >
+              + 新会话
+            </button>
+
+            {/* Book + template selectors — subtle */}
+            <div className="space-y-1.5 mb-3">
+              <select
+                value={currentBook?.id || ''}
+                onChange={(e) => {
+                  const book = books.find(b => b.id === e.target.value);
+                  if (book) handleSelectBook(book);
+                }}
+                className="w-full text-[11px] text-text-muted bg-transparent border-none outline-none cursor-pointer truncate"
+              >
+                <option value="">📚 选择书籍...</option>
+                {books.map((b) => (
+                  <option key={b.id} value={b.id}>{b.title}</option>
+                ))}
+              </select>
+              <select
+                value={templateId}
+                onChange={(e) => setTemplate(e.target.value)}
+                className="w-full text-[11px] text-text-muted bg-transparent border-none outline-none cursor-pointer truncate"
+                title="学习模式"
+              >
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tab switcher — more subtle */}
+            <div className="flex gap-3 text-xs border-b border-border pb-2">
               <button
                 onClick={() => setActiveTab('sessions')}
-                className={`flex-1 text-xs px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`pb-1.5 border-b-2 transition-colors ${
                   activeTab === 'sessions'
-                    ? 'bg-white text-text-primary shadow-sm'
-                    : 'text-text-muted hover:text-text-secondary'
+                    ? 'border-brand text-text-primary font-medium'
+                    : 'border-transparent text-text-muted hover:text-text-secondary'
                 }`}
               >
                 会话
               </button>
               <button
                 onClick={() => setActiveTab('notes')}
-                className={`flex-1 text-xs px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`pb-1.5 border-b-2 transition-colors ${
                   activeTab === 'notes'
-                    ? 'bg-white text-text-primary shadow-sm'
-                    : 'text-text-muted hover:text-text-secondary'
+                    ? 'border-brand text-text-primary font-medium'
+                    : 'border-transparent text-text-muted hover:text-text-secondary'
                 }`}
               >
                 笔记
@@ -269,56 +305,7 @@ export default function SessionSidebar() {
 
           {activeTab === 'sessions' ? (
             <>
-              {/* New session + book selector */}
-              <div className="px-3 pb-3 border-b border-border space-y-2">
-                <div className="flex gap-1.5">
-                  <select
-                    value={currentBook?.id || ''}
-                    onChange={(e) => {
-                      const book = books.find(b => b.id === e.target.value);
-                      if (book) handleSelectBook(book);
-                    }}
-                    className="flex-1 text-xs text-text-primary bg-page border border-border rounded-lg px-2.5 py-1.5 outline-none"
-                  >
-                    <option value="">选择书籍...</option>
-                    {books.map((b) => (
-                      <option key={b.id} value={b.id}>{b.title}</option>
-                    ))}
-                  </select>
-                  {currentBook && (
-                    <button
-                      onClick={() => handleDeleteBook(currentBook)}
-                      title="删除此书"
-                      className="text-text-muted hover:text-red-500 px-1.5 py-1 transition-colors"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-                        <path d="M2 3.5h10M5 3.5V2.5a1 1 0 011-1h2a1 1 0 011 1v1M11 3.5v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <div className="flex gap-1.5">
-                  <select
-                    value={templateId}
-                    onChange={(e) => setTemplate(e.target.value)}
-                    className="flex-1 text-xs text-text-primary bg-page border border-border rounded-lg px-2 py-1.5 outline-none"
-                    title="学习模式"
-                  >
-                    {templates.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={handleNewSession}
-                    className="text-xs text-brand font-medium border border-brand/30 rounded-lg px-3 py-1.5 hover:bg-brand/5 transition-colors whitespace-nowrap"
-                  >
-                    + 新会话
-                  </button>
-                </div>
-                <p className="text-[11px] text-text-muted leading-relaxed">
-                  {currentTemplate.description}
-                </p>
-              </div>
+              {/* Session list */}
 
               {/* Session list */}
               <div className="flex-1 overflow-y-auto">
@@ -424,13 +411,8 @@ export default function SessionSidebar() {
             </div>
           )}
           {/* Footer */}
-          <div className="mt-auto border-t border-border px-3 py-2 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-text-muted">
-                {currentBook ? currentBook.title : '未选择'}
-              </span>
-              <span className="text-[10px] text-text-muted">{currentPhase}</span>
-            </div>
+          <div className="mt-auto border-t border-border px-3 py-2.5 flex items-center justify-between">
+            <span className="text-[11px] text-text-muted">{currentPhase}</span>
             <button
               onClick={toggleSettings}
               title="设置"
