@@ -22,6 +22,7 @@ export default function MessageList() {
   const currentBook = useStore((s) => s.currentBook);
   const setCurrentSession = useStore((s) => s.setCurrentSession);
   const setTemplate = useStore((s) => s.setTemplate);
+  const setNewBookModalOpen = useStore((s) => s.setNewBookModalOpen);
   const { askAI, createBook, fetchSessions, saveSession } = useApi();
 
   // Auto-scroll to bottom when messages change or during streaming
@@ -40,19 +41,21 @@ export default function MessageList() {
 
   const handleWelcomeAction = async (action: string) => {
     if (action === 'new-session') {
-      const book = currentBook;
-      if (!book) return;
-      const session: Session = {
-        id: `sess_${Date.now()}`,
-        bookId: book.id,
-        phase: '摸底测试',
-        round: 1,
-        messages: [],
-        createdAt: new Date().toISOString(),
-      };
-      setCurrentSession(session);
-      saveSession(session);
-      askAI();
+      if (currentBook) {
+        const session: Session = {
+          id: `sess_${Date.now()}`,
+          bookId: currentBook.id,
+          phase: '摸底测试',
+          round: 1,
+          messages: [],
+          createdAt: new Date().toISOString(),
+        };
+        setCurrentSession(session);
+        saveSession(session);
+        askAI();
+      } else {
+        setNewBookModalOpen(true);
+      }
     } else if (action === 'socratic') {
       setTemplate('socratic');
     } else if (action === 'feynman') {

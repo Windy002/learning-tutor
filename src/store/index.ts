@@ -44,6 +44,10 @@ interface AppState {
   setSuggestedPhase: (phase: string | null, reason?: string) => void;
   clearSuggestion: () => void;
 
+  // New book modal (triggered from anywhere)
+  newBookModalOpen: boolean;
+  setNewBookModalOpen: (open: boolean) => void;
+
   // Toast
   toast: { message: string; type: 'success' | 'error' } | null;
   showToast: (message: string, type?: 'success' | 'error') => void;
@@ -116,6 +120,9 @@ export const useStore = create<AppState>((set) => ({
   suggestedPhaseReason: '',
   setSuggestedPhase: (phase, reason = '') => set({ suggestedPhase: phase, suggestedPhaseReason: reason }),
   clearSuggestion: () => set({ suggestedPhase: null, suggestedPhaseReason: '' }),
+
+  newBookModalOpen: false,
+  setNewBookModalOpen: (open) => set({ newBookModalOpen: open }),
 
   toast: null,
   showToast: (message, type = 'success') => set({ toast: { message, type } }),

@@ -30,8 +30,9 @@ export default function SessionSidebar() {
   const suggestedPhaseReason = useStore((s) => s.suggestedPhaseReason);
   const clearSuggestion = useStore((s) => s.clearSuggestion);
   const toggleSettings = useStore((s) => s.toggleSettings);
+  const showNewBook = useStore((s) => s.newBookModalOpen);
+  const setShowNewBook = useStore((s) => s.setNewBookModalOpen);
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
-  const [showNewBook, setShowNewBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
   const [newBookDomain, setNewBookDomain] = useState('');
   const [newBookGoal, setNewBookGoal] = useState('');
