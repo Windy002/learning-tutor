@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        page: '#faf8f5',
+        page: '#f8f8f6',
         bubble: '#f0ede6',
         border: '#e8e3dc',
         'text-primary': '#3d3929',

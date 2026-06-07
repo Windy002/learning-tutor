@@ -204,12 +204,12 @@ export default function SessionSidebar() {
         <div className="fixed inset-0 bg-black/10 z-20 lg:hidden" onClick={toggleSidebar} />
       )}
       <aside
-        className={`flex-shrink-0 bg-white border-r border-border
+        className={`flex-shrink-0 bg-page border-r border-r-[0.8px] border-border/80
           transform transition-all duration-200 overflow-hidden
-          ${isOpen ? 'w-[260px]' : 'w-0'}
+          ${isOpen ? 'w-72' : 'w-0'}
         `}
       >
-        <div className="w-[260px] h-full flex flex-col">
+        <div className="w-72 h-full flex flex-col">
           {/* Header — Claude.ai style */}
           <div className="px-3 pt-4 pb-3">
             <div className="flex items-center gap-2.5 mb-4">
