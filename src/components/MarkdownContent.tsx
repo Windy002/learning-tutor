@@ -1,10 +1,41 @@
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Props {
   content: string;
+}
+
+function CodeBlock({ language, code }: { language: string; code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // fallback
+    }
+  }, [code]);
+
+  return (
+    <div className="relative group">
+      <div className="flex items-center justify-between px-4 py-1.5 bg-[#ede8dd] rounded-t-lg border border-b-0 border-[#e8e3dc]">
+        <span className="text-[11px] text-text-muted font-medium">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="text-[11px] text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100"
+        >
+          {copied ? '✓ 已复制' : '📋 复制'}
+        </button>
+      </div>
+      <pre className="!mt-0 !rounded-t-none !bg-[#f5f2eb] !border !border-[#e8e3dc] !rounded-lg !shadow-sm !text-[13px] !leading-relaxed">
+        <code className={`language-${language}`}>{code}</code>
+      </pre>
+    </div>
+  );
 }
 
 export default function MarkdownContent({ content }: Props) {
@@ -44,6 +75,23 @@ export default function MarkdownContent({ content }: Props) {
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
+        components={{
+          pre({ children }) {
+            return <>{children}</>;
+          },
+          code({ className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const codeStr = String(children).replace(/\n$/, '');
+            if (match) {
+              return <CodeBlock language={match[1]} code={codeStr} />;
+            }
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
+        }}
       >
         {content}
       </ReactMarkdown>

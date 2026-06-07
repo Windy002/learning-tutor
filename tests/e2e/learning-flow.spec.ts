@@ -4,7 +4,7 @@ test.describe('App shell', () => {
   test('loads with correct title and empty state', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('banner').locator('text=学习导师')).toBeVisible();
-    await expect(page.locator('text=开始你的学习旅程')).toBeVisible();
+    await expect(page.locator('text=你好，我是学习导师')).toBeVisible();
   });
 
   test('shows sidebar with phase display', async ({ page }) => {
