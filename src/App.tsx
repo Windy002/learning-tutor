@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
 import TopBar from './components/TopBar';
-import PhaseBanner from './components/PhaseBanner';
-import PhaseSuggestionBanner from './components/PhaseSuggestionBanner';
 import MessageList from './components/MessageList';
 import InputBox from './components/InputBox';
 import SessionSidebar from './components/SessionSidebar';
@@ -22,7 +20,6 @@ function App() {
     if (error && error !== prevError.current) {
       showToast(error, 'error');
       prevError.current = error;
-      // Clear error after showing toast
       setTimeout(() => setError(null), 100);
     }
   }, [error, showToast, setError]);
@@ -30,8 +27,6 @@ function App() {
   return (
     <div className="h-screen flex flex-col bg-page">
       <TopBar />
-      <PhaseBanner />
-      <PhaseSuggestionBanner />
       <div className="flex-1 flex overflow-hidden">
         <SessionSidebar />
         <div className="flex-1 flex flex-col min-w-0">

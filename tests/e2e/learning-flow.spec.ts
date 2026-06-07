@@ -7,44 +7,48 @@ test.describe('App shell', () => {
     await expect(page.locator('text=开始你的学习旅程')).toBeVisible();
   });
 
-  test('shows phase banner with default phase', async ({ page }) => {
+  test('shows sidebar with phase display', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=当前阶段：摸底测试')).toBeVisible();
+    // Sidebar is open by default — check phase info is visible (first match is the phase label span)
+    await expect(page.getByRole('complementary').locator('text=摸底测试').first()).toBeVisible();
   });
 });
 
 test.describe('Sidebar', () => {
-  test('opens sidebar via toolbar button', async ({ page }) => {
+  test('sidebar is open by default with tabs visible', async ({ page }) => {
     await page.goto('/');
-    await page.locator('header button').first().click();
-    // Tab buttons should be visible
     await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: '笔记', exact: true })).toBeVisible();
   });
 
-  test('opens sidebar via Ctrl+B', async ({ page }) => {
+  test('toggles sidebar via Ctrl+B', async ({ page }) => {
     await page.goto('/');
+    // Focus page first, then close sidebar with keyboard
+    await page.locator('body').click();
+    await page.keyboard.press('Control+b');
+    // Sidebar should collapse (the 'w-[260px]' class should be removed)
+    await expect(page.locator('aside')).not.toHaveClass(/w-\[260px\]/);
+    // Re-open
     await page.keyboard.press('Control+b');
     await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
   });
 
-  test('closes sidebar when clicking ×', async ({ page }) => {
+  test('toggles sidebar via toolbar button', async ({ page }) => {
     await page.goto('/');
+    // Sidebar open by default — click hamburger to close
     await page.locator('header button').first().click();
-    await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
-    // Click the close × button
-    await page.locator('aside').getByText('×').click();
     // Sidebar should collapse
     await expect(page.locator('aside')).toHaveClass(/w-0/);
+    // Click again to open
+    await page.locator('header button').first().click();
+    await expect(page.getByRole('button', { name: '会话', exact: true })).toBeVisible();
   });
 });
 
 test.describe('Create book and session', () => {
   test('shows new book modal when clicking + 新会话 with no book', async ({ page }) => {
     await page.goto('/');
-    // Open sidebar
-    await page.locator('header button').first().click();
-    // Click + 新会话 without selecting a book
+    // Sidebar already open — click + 新会话 without selecting a book
     await page.locator('button:has-text("+ 新会话")').click();
     // Modal should appear
     await expect(page.locator('text=新建书籍')).toBeVisible();
@@ -53,7 +57,6 @@ test.describe('Create book and session', () => {
 
   test('creates a book through the modal', async ({ page }) => {
     await page.goto('/');
-    await page.locator('header button').first().click();
     await page.locator('button:has-text("+ 新会话")').click();
 
     // Fill book form with unique name to avoid collision
@@ -97,27 +100,29 @@ test.describe('Messaging', () => {
 });
 
 test.describe('Phase switching', () => {
-  test('changes phase banner when switching via dropdown', async ({ page }) => {
+  test('shows phase in sidebar and can switch via dropdown', async ({ page }) => {
     await page.goto('/');
-    const select = page.locator('header select');
+    // Sidebar shows default phase (first match is the phase label span)
+    await expect(page.getByRole('complementary').locator('text=摸底测试').first()).toBeVisible();
+    // Phase select is now in sidebar
+    const select = page.getByRole('complementary').locator('select').first();
     await select.selectOption('全景收网');
-    await expect(page.locator('text=当前阶段：全景收网')).toBeVisible();
+    await expect(page.getByRole('complementary').locator('text=全景收网').first()).toBeVisible();
   });
 
-  test('cycles through all phases', async ({ page }) => {
+  test('cycles through all phases via sidebar', async ({ page }) => {
     await page.goto('/');
-    const select = page.locator('header select');
+    const select = page.getByRole('complementary').locator('select').first();
     for (const phase of ['精准补漏', '循环迭代', '全景收网', '摸底测试']) {
       await select.selectOption(phase);
-      await expect(page.locator(`text=当前阶段：${phase}`)).toBeVisible();
+      await expect(page.getByRole('complementary').locator('text=' + phase).first()).toBeVisible();
     }
   });
 });
 
-test.describe('Phase suggestion banner', () => {
-  test('appears when store has suggestedPhase and handles confirm', async ({ page }) => {
+test.describe('Phase suggestion', () => {
+  test('shows in sidebar and handles confirm', async ({ page }) => {
     await page.goto('/');
-    // Inject suggested phase via store
     await page.evaluate(() => {
       const store = (window as any).__STORE__;
       if (store) {
@@ -129,17 +134,18 @@ test.describe('Phase suggestion banner', () => {
     });
     await page.waitForTimeout(300);
 
-    // Banner should show
-    await expect(page.getByRole('button', { name: '确认切换' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '忽略' })).toBeVisible();
-    await expect(page.getByText('已完成摸底，识别到盲区')).toBeVisible();
+    // Suggestion appears in sidebar
+    const sidebar = page.getByRole('complementary');
+    await expect(sidebar.getByText(/建议切换至/)).toBeVisible();
+    await expect(sidebar.getByRole('button', { name: '确认' })).toBeVisible();
+    await expect(sidebar.getByRole('button', { name: '忽略' })).toBeVisible();
 
     // Click confirm
-    await page.getByRole('button', { name: '确认切换' }).click();
-    await expect(page.getByRole('button', { name: '确认切换' })).not.toBeVisible();
+    await sidebar.getByRole('button', { name: '确认' }).click();
+    await expect(sidebar.getByText(/建议切换至/)).not.toBeVisible();
   });
 
-  test('clicking ignore dismisses the banner', async ({ page }) => {
+  test('clicking ignore dismisses', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => {
       const store = (window as any).__STORE__;
@@ -149,8 +155,9 @@ test.describe('Phase suggestion banner', () => {
     });
     await page.waitForTimeout(300);
 
-    await expect(page.getByRole('button', { name: '忽略' })).toBeVisible();
-    await page.getByRole('button', { name: '忽略' }).click();
-    await expect(page.getByRole('button', { name: '忽略' })).not.toBeVisible();
+    const sidebar = page.getByRole('complementary');
+    await expect(sidebar.getByRole('button', { name: '忽略' })).toBeVisible();
+    await sidebar.getByRole('button', { name: '忽略' }).click();
+    await expect(sidebar.getByText(/建议切换至/)).not.toBeVisible();
   });
 });

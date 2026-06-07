@@ -90,7 +90,7 @@ export const useStore = create<AppState>((set) => ({
   currentRound: 1,
   setCurrentRound: (round) => set({ currentRound: round }),
 
-  isNotesOpen: false,
+  isNotesOpen: true,
   toggleNotes: () => set((state) => ({ isNotesOpen: !state.isNotesOpen })),
   setNotesOpen: (open) => set({ isNotesOpen: open }),
 

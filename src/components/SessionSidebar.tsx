@@ -26,6 +26,9 @@ export default function SessionSidebar() {
   const setBooks = useStore((s) => s.setBooks);
   const setSessions = useStore((s) => s.setSessions);
   const setMessages = useStore((s) => s.setMessages);
+  const suggestedPhase = useStore((s) => s.suggestedPhase);
+  const suggestedPhaseReason = useStore((s) => s.suggestedPhaseReason);
+  const clearSuggestion = useStore((s) => s.clearSuggestion);
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
   const [showNewBook, setShowNewBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
@@ -190,16 +193,62 @@ export default function SessionSidebar() {
       <aside
         className={`flex-shrink-0 bg-white border-r border-border
           transform transition-all duration-200 overflow-hidden
-          ${isOpen ? 'w-[280px]' : 'w-0'}
+          ${isOpen ? 'w-[260px]' : 'w-0'}
         `}
       >
-        <div className="w-[280px] h-full flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
-            <div className="flex bg-bubble rounded-lg p-0.5 gap-0.5">
+        <div className="w-[260px] h-full flex flex-col">
+          {/* Header — logo + title + tabs */}
+          <div className="px-3 pt-3 pb-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 bg-brand rounded flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-[10px] font-bold">学</span>
+              </div>
+              <span className="text-sm font-semibold text-text-primary">学习导师</span>
+            </div>
+
+            {/* Phase + round */}
+            <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
+              <span className="font-medium text-text-secondary">{currentPhase}</span>
+              <span>·</span>
+              <span>第 {currentRound} 轮</span>
+              <select
+                value={currentPhase}
+                onChange={(e) => setCurrentPhase(e.target.value as any)}
+                className="ml-auto text-[11px] text-text-muted bg-transparent border border-border rounded px-1.5 py-0.5 outline-none cursor-pointer"
+              >
+                {currentTemplate.phases.map((p) => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Phase suggestion */}
+            {suggestedPhase && (
+              <div className="mb-2 text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 text-amber-700">
+                <p>🎯 建议切换至「{suggestedPhase}」</p>
+                <p className="opacity-70 mt-0.5">{suggestedPhaseReason}</p>
+                <div className="flex gap-2 mt-1.5">
+                  <button
+                    onClick={() => { setCurrentPhase(suggestedPhase as any); clearSuggestion(); }}
+                    className="text-[11px] bg-amber-200/50 hover:bg-amber-200 rounded px-2 py-0.5 font-medium"
+                  >
+                    确认
+                  </button>
+                  <button
+                    onClick={clearSuggestion}
+                    className="text-[11px] hover:bg-amber-100 rounded px-2 py-0.5"
+                  >
+                    忽略
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Tab switcher */}
+            <div className="flex bg-bubble rounded-lg p-0.5 gap-0.5 mb-2">
               <button
                 onClick={() => setActiveTab('sessions')}
-                className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`flex-1 text-xs px-3 py-1 rounded-md font-medium transition-colors ${
                   activeTab === 'sessions'
                     ? 'bg-white text-text-primary shadow-sm'
                     : 'text-text-muted hover:text-text-secondary'
@@ -209,7 +258,7 @@ export default function SessionSidebar() {
               </button>
               <button
                 onClick={() => setActiveTab('notes')}
-                className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`flex-1 text-xs px-3 py-1 rounded-md font-medium transition-colors ${
                   activeTab === 'notes'
                     ? 'bg-white text-text-primary shadow-sm'
                     : 'text-text-muted hover:text-text-secondary'
@@ -218,13 +267,12 @@ export default function SessionSidebar() {
                 笔记
               </button>
             </div>
-            <button onClick={toggleSidebar} className="text-text-muted hover:text-text-primary text-lg leading-none">&times;</button>
           </div>
 
           {activeTab === 'sessions' ? (
             <>
-              {/* Book selector + New session */}
-              <div className="p-3 border-b border-border space-y-2">
+              {/* New session + book selector */}
+              <div className="px-3 pb-3 border-b border-border space-y-2">
                 <div className="flex gap-1.5">
                   <select
                     value={currentBook?.id || ''}
@@ -377,6 +425,22 @@ export default function SessionSidebar() {
               </div>
             </div>
           )}
+          {/* Footer */}
+          <div className="mt-auto border-t border-border px-3 py-2 flex items-center justify-between">
+            <span className="text-[11px] text-text-muted">
+              {currentBook ? `📖 ${currentBook.title}` : '未选择书籍'}
+            </span>
+            <button
+              onClick={() => useStore.getState().toggleSettings()}
+              title="设置"
+              className="text-text-muted hover:text-text-primary transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="8" r="2.5" />
+                <path d="M8 1.5v1.5M8 13v1.5M3.4 3.4l1 1M11.6 11.6l1 1M1.5 8H3M13 8h1.5M3.4 12.6l1-1M11.6 4.4l1-1" />
+              </svg>
+            </button>
+          </div>
         </div>
       </aside>
 
