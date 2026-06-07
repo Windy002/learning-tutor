@@ -118,10 +118,10 @@ export default function InputBox() {
               🤖 {phaseLabel}
             </button>
           )}
-          <p className="text-center text-[11px] text-text-muted mt-2">
-            AI 导师可能会出错，请核实重要信息。
-          </p>
         </div>
+        <p className="text-center text-[11px] text-text-muted mt-2">
+          AI 导师可能会出错，请核实重要信息。
+        </p>
       </div>
     </div>
   );

@@ -29,6 +29,7 @@ export default function SessionSidebar() {
   const suggestedPhase = useStore((s) => s.suggestedPhase);
   const suggestedPhaseReason = useStore((s) => s.suggestedPhaseReason);
   const clearSuggestion = useStore((s) => s.clearSuggestion);
+  const toggleSettings = useStore((s) => s.toggleSettings);
   const [activeTab, setActiveTab] = useState<'sessions' | 'notes'>('sessions');
   const [showNewBook, setShowNewBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
@@ -36,11 +37,16 @@ export default function SessionSidebar() {
   const [newBookGoal, setNewBookGoal] = useState('');
   const [newNoteText, setNewNoteText] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [confirmDeleteBook, setConfirmDeleteBook] = useState<Book | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const fetchedRef = useRef(false);
   useEffect(() => {
-    fetchBooks();
-  }, []);
+    if (!fetchedRef.current) {
+      fetchedRef.current = true;
+      fetchBooks();
+    }
+  }, [fetchBooks]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -138,8 +144,14 @@ export default function SessionSidebar() {
     }
   };
 
-  const handleDeleteBook = async (book: Book) => {
-    if (!confirm(`确定删除《${book.title}》及其所有会话？`)) return;
+  const handleDeleteBook = (book: Book) => {
+    setConfirmDeleteBook(book);
+  };
+
+  const confirmDeleteBookAction = async () => {
+    const book = confirmDeleteBook;
+    if (!book) return;
+    setConfirmDeleteBook(null);
     try {
       await fetch(`/api/books/${encodeURIComponent(book.id)}`, { method: 'DELETE' });
       setBooks(books.filter(b => b.id !== book.id));
@@ -431,7 +443,7 @@ export default function SessionSidebar() {
               {currentBook ? `📖 ${currentBook.title}` : '未选择书籍'}
             </span>
             <button
-              onClick={() => useStore.getState().toggleSettings()}
+              onClick={toggleSettings}
               title="设置"
               className="text-text-muted hover:text-text-primary transition-colors"
             >
@@ -443,6 +455,22 @@ export default function SessionSidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Confirm delete book modal */}
+      {confirmDeleteBook && (
+        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center" onClick={() => setConfirmDeleteBook(null)}>
+          <div className="bg-white rounded-xl shadow-xl p-5 w-[320px]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-text-primary mb-2">确认删除</h3>
+            <p className="text-xs text-text-secondary mb-4">
+              确定删除《{confirmDeleteBook.title}》及其所有会话？此操作不可撤销。
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmDeleteBook(null)} className="text-xs text-text-muted hover:text-text-primary px-3 py-1.5">取消</button>
+              <button onClick={confirmDeleteBookAction} className="text-xs bg-red-500 text-white rounded-lg px-4 py-1.5 hover:bg-red-600">删除</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* New book modal */}
       {showNewBook && (

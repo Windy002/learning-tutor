@@ -45,7 +45,7 @@ function parseMeta(content: string): { cleaned: string; meta: ParsedMeta | null 
   while ((kvMatch = kvRegex.exec(raw)) !== null) {
     const key = kvMatch[1] as keyof ParsedMeta;
     const val = kvMatch[2];
-    if (key === 'round') kvMeta.round = parseInt(val) || undefined;
+    if (key === 'round') { const n = parseInt(val); kvMeta.round = isNaN(n) ? undefined : n; }
     else if (key === 'phase') kvMeta.phase = val;
     else if (key === 'type') kvMeta.type = val as ParsedMeta['type'];
     else if (key === 'verdict') kvMeta.verdict = val as ParsedMeta['verdict'];
@@ -83,7 +83,7 @@ async function saveCurrentSession() {
       }),
     });
   } catch {
-    // silently fail, non-critical
+    useStore.getState().setError('会话保存失败，请检查磁盘空间');
   }
 }
 

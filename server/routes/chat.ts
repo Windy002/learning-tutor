@@ -28,6 +28,7 @@ router.post('/', async (req, res) => {
 
     const reader = stream.getReader();
     const decoder = new TextDecoder();
+    let buf = '';
 
     const pump = async () => {
       try {
@@ -39,9 +40,9 @@ router.post('/', async (req, res) => {
             break;
           }
 
-          const chunk = decoder.decode(value, { stream: true });
-          // Parse SSE from OpenAI-compatible stream
-          const lines = chunk.split('\n');
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const data = line.slice(6);
