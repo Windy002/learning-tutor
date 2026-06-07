@@ -11,9 +11,8 @@ export default function TopBar() {
         title="侧栏"
         className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bubble transition-colors"
       >
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-          <rect x="2" y="3" width="5" height="12" rx="1" />
-          <rect x="11" y="7" width="5" height="8" rx="1" />
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+          <path d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11" />
         </svg>
       </button>
 

@@ -213,12 +213,12 @@ export default function SessionSidebar() {
           {/* Header — Claude.ai style */}
           <div className="px-3 pt-4 pb-3">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 bg-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-                  <path d="M4 8l3 3 5-6" />
+              <div className="w-7 h-7 bg-brand rounded-[9px] flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7l3 3 5-6" />
                 </svg>
               </div>
-              <span className="text-[15px] font-semibold text-text-primary">学习导师</span>
+              <span className="text-[14px] font-semibold text-text-primary">学习导师</span>
             </div>
 
             {/* Phase suggestion */}
