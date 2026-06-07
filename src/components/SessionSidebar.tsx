@@ -1,6 +1,6 @@
 import { useStore } from '../store';
 import { useApi } from '../hooks/useApi';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Book, Session } from '../types';
 import { templates } from '../templates';
 
@@ -32,12 +32,38 @@ export default function SessionSidebar() {
   const [newBookDomain, setNewBookDomain] = useState('');
   const [newBookGoal, setNewBookGoal] = useState('');
   const [newNoteText, setNewNoteText] = useState('');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchBooks();
   }, []);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    // Delay to avoid capturing the current click
+    setTimeout(() => document.addEventListener('click', handleClick), 0);
+    return () => document.removeEventListener('click', handleClick);
+  }, [openMenuId]);
+
   const notes = currentBook?.notes || [];
+
+  const getSessionTitle = (s: Session): string => {
+    const firstAI = s.messages?.find(m => m.role === 'assistant');
+    if (firstAI?.content) {
+      // Clean: strip META tag, take first line or first 40 chars
+      const cleaned = firstAI.content.replace(/\[META:.*\]/s, '').trim();
+      const firstLine = cleaned.split('\n')[0].replace(/^#+\s*/, '');
+      return firstLine.slice(0, 40) + (firstLine.length > 40 ? '…' : '');
+    }
+    return `${s.phase} · 第 ${s.round} 轮`;
+  };
 
   const handleNewSession = () => {
     if (!currentBook) {
@@ -94,12 +120,15 @@ export default function SessionSidebar() {
 
   const handleDeleteSession = async (session: Session) => {
     try {
-      await fetch(`/api/sessions/${encodeURIComponent(session.id)}`, { method: 'DELETE' });
-      setSessions(sessions.filter(s => s.id !== session.id));
+      const res = await fetch(`/api/sessions/${encodeURIComponent(session.id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      const updated = sessions.filter(s => s.id !== session.id);
+      setSessions(updated);
       if (currentSession?.id === session.id) {
         setCurrentSession(null);
         setMessages([]);
       }
+      setOpenMenuId(null);
       showToast('会话已删除');
     } catch {
       showToast('删除失败', 'error');
@@ -255,30 +284,47 @@ export default function SessionSidebar() {
                   sessions.map((s) => (
                     <div
                       key={s.id}
-                      className={`flex items-center border-b border-border/50 hover:bg-page transition-colors group ${
+                      className={`flex items-center hover:bg-page transition-colors relative ${
                         currentSession?.id === s.id ? 'bg-page border-l-2 border-l-brand' : ''
                       }`}
                     >
                       <button
                         onClick={() => handleSelectSession(s)}
-                        className="flex-1 text-left px-3 py-2.5"
+                        className="flex-1 text-left px-3 py-2.5 min-w-0"
                       >
-                        <p className="text-xs text-text-primary truncate">
-                          {s.messages?.[0]?.content?.slice(0, 30) || `${s.phase} · 第 ${s.round} 轮`}
+                        <p className="text-[13px] text-text-primary truncate leading-snug">
+                          {getSessionTitle(s)}
                         </p>
                         <p className="text-[11px] text-text-muted mt-0.5">
-                          {new Date(s.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · {s.phase} · {s.messages?.length || 0} 条消息
+                          {new Date(s.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                         </p>
                       </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteSession(s); }}
-                        title="删除会话"
-                        className="text-text-muted hover:text-red-500 px-2 opacity-30 hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === s.id ? null : s.id);
+                        }}
+                        className="text-text-muted hover:text-text-primary hover:bg-bubble rounded p-1 mr-1 transition-colors"
                       >
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-                          <path d="M2 3.5h10M5 3.5V2.5a1 1 0 011-1h2a1 1 0 011 1v1M11 3.5v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8" />
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                          <circle cx="7" cy="2" r="1.3" />
+                          <circle cx="7" cy="7" r="1.3" />
+                          <circle cx="7" cy="12" r="1.3" />
                         </svg>
                       </button>
+                      {openMenuId === s.id && (
+                        <div
+                          ref={menuRef}
+                          className="absolute right-8 top-1/2 -translate-y-1/2 z-30 bg-white border border-border rounded-lg shadow-lg py-1 min-w-[100px]"
+                        >
+                          <button
+                            onClick={() => handleDeleteSession(s)}
+                            className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            删除会话
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
